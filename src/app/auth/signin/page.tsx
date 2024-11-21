@@ -1,17 +1,73 @@
+"use client";
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm, SubmitHandler, set } from "react-hook-form";
+import { Input, Button, Typography } from "@material-tailwind/react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
-export const metadata: Metadata = {
-  title:
-    "Fizzvisa",
-  description: "We provide a simple, fast, and easy online travel Visa conclerge",
-};
+interface IFormInput {
+  username: string;
+  password: string;
+}
+
+const schema = yup
+  .object({
+    username: yup.string().required("Username is required"),
+    password: yup.string().required("Password is required"),
+  })
+  .required();
 
 const SignIn: React.FC = () => {
+  const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IFormInput>({
+    resolver: yupResolver(schema),
+  });
+
+  const [submitStatus, setSubmitStatus] = React.useState<{
+    load: boolean;
+    error: string;
+  }>({ load: false, error: "" });
+  const onSubmit = async (data: IFormInput) => {
+    setSubmitStatus({ load: true, error: "" });
+    try {
+      await axios
+        .post(`${process.env.NEXT_PUBLIC_DEV_API}/users/login`, data)
+        .then((res) => {
+          console.log(res.data);
+
+          if (res.data.message == "success") {
+            Cookies.set("token", res.data.token);
+
+            router.push(`/`);
+          }
+          setSubmitStatus({ load: false, error: "" });
+        });
+    } catch (error) {
+      console.log(error);
+      if (axios.isAxiosError(error)) {
+        console.log(error.response);
+        setSubmitStatus({
+          load: false,
+          error: error.response?.data?.message || "An error occurred",
+        });
+      } else {
+        console.log(error);
+      }
+    }
+  };
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Sign In" />
@@ -174,16 +230,19 @@ const SignIn: React.FC = () => {
                 Sign In to FizzVisa
               </h2>
 
-              <form>
+              <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
-                    Email
+                    Username
                   </label>
-                  <div className="relative">
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  <div className="relative flex items-center justify-center">
+                    <Input
+                      crossOrigin={undefined}
+                      onPointerEnterCapture={undefined}
+                      onPointerLeaveCapture={undefined}
+                      {...register("username")}
+                      type="text"
+                      className="w-full rounded-lg border border-stroke bg-transparent py-6 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
 
                     <span className="absolute right-4 top-4">
@@ -191,30 +250,54 @@ const SignIn: React.FC = () => {
                         className="fill-current"
                         width="22"
                         height="22"
-                        viewBox="0 0 22 22"
-                        fill="none"
+                        viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <g opacity="0.5">
-                          <path
-                            d="M19.2516 3.30005H2.75156C1.58281 3.30005 0.585938 4.26255 0.585938 5.46567V16.6032C0.585938 17.7719 1.54844 18.7688 2.75156 18.7688H19.2516C20.4203 18.7688 21.4172 17.8063 21.4172 16.6032V5.4313C21.4172 4.26255 20.4203 3.30005 19.2516 3.30005ZM19.2516 4.84692C19.2859 4.84692 19.3203 4.84692 19.3547 4.84692L11.0016 10.2094L2.64844 4.84692C2.68281 4.84692 2.71719 4.84692 2.75156 4.84692H19.2516ZM19.2516 17.1532H2.75156C2.40781 17.1532 2.13281 16.8782 2.13281 16.5344V6.35942L10.1766 11.5157C10.4172 11.6875 10.6922 11.7563 10.9672 11.7563C11.2422 11.7563 11.5172 11.6875 11.7578 11.5157L19.8016 6.35942V16.5688C19.8703 16.9125 19.5953 17.1532 19.2516 17.1532Z"
-                            fill=""
-                          />
+                          <circle cx="12" cy="8" r="4" />
+
+                          <path d="M12 14c-4.418 0-8 2.015-8 4.5V20h16v-1.5c0-2.485-3.582-4.5-8-4.5z" />
                         </g>
                       </svg>
                     </span>
                   </div>
+                  {errors.username && (
+                    <Typography
+                      className="mt-5 flex items-center gap-2 text-sm text-red-500"
+                      placeholder={undefined}
+                      onPointerEnterCapture={undefined}
+                      onPointerLeaveCapture={undefined}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="h-5 w-5"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                          clip-rule="evenodd"
+                        ></path>
+                      </svg>
+                      {errors.username.message}
+                    </Typography>
+                  )}
                 </div>
 
                 <div className="mb-6">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
                     Password
                   </label>
-                  <div className="relative">
-                    <input
+                  <div className="relative flex items-center justify-center">
+                    <Input
+                      crossOrigin={undefined}
+                      onPointerEnterCapture={undefined}
+                      onPointerLeaveCapture={undefined}
+                      {...register("password")}
                       type="password"
                       placeholder="6+ Characters, 1 Capital letter"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="w-full rounded-lg border border-stroke bg-transparent py-6 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
 
                     <span className="absolute right-4 top-4">
@@ -239,17 +322,65 @@ const SignIn: React.FC = () => {
                       </svg>
                     </span>
                   </div>
+                  {errors.password && (
+                    <Typography
+                      className="mt-5 flex items-center gap-2 text-sm text-red-500"
+                      placeholder={undefined}
+                      onPointerEnterCapture={undefined}
+                      onPointerLeaveCapture={undefined}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="h-5 w-5"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                          clip-rule="evenodd"
+                        ></path>
+                      </svg>
+                      {errors.password.message}
+                    </Typography>
+                  )}
                 </div>
-
+                {submitStatus.error != "" && (
+                  <Typography
+                    className="mb-2 mt-2 flex items-center gap-2 text-sm text-red-500"
+                    placeholder={undefined}
+                    onPointerEnterCapture={undefined}
+                    onPointerLeaveCapture={undefined}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-5 w-5"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                    {submitStatus.error}
+                  </Typography>
+                )}
                 <div className="mb-5">
-                  <input
+                  <Button
                     type="submit"
-                    value="Sign In"
+                    placeholder={undefined}
+                    onPointerEnterCapture={undefined}
+                    onPointerLeaveCapture={undefined}
+                    disabled={submitStatus.load}
                     className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-                  />
+                  >
+                    {submitStatus.load ? "Loading..." : "LOgin"}
+                  </Button>
                 </div>
 
-                <button className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50">
+                {/* <button className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50">
                   <span>
                     <svg
                       width="20"
@@ -293,7 +424,7 @@ const SignIn: React.FC = () => {
                       Sign Up
                     </Link>
                   </p>
-                </div>
+                </div> */}
               </form>
             </div>
           </div>
