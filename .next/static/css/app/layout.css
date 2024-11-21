@@ -792,6 +792,9 @@ body{
 .mt-15{
   margin-top: 3.75rem;
 }
+.mt-2{
+  margin-top: 0.5rem;
+}
 .mt-2\.5{
   margin-top: 0.625rem;
 }
@@ -809,9 +812,6 @@ body{
 }
 .mt-6\.5{
   margin-top: 1.625rem;
-}
-.mt-2{
-  margin-top: 0.5rem;
 }
 .\!block{
   display: block !important;
@@ -1829,6 +1829,10 @@ body{
   --tw-text-opacity: 1;
   color: rgb(60 80 224 / var(--tw-text-opacity));
 }
+.text-red-500{
+  --tw-text-opacity: 1;
+  color: rgb(239 68 68 / var(--tw-text-opacity));
+}
 .text-secondary{
   --tw-text-opacity: 1;
   color: rgb(128 202 238 / var(--tw-text-opacity));
@@ -1844,10 +1848,6 @@ body{
 .text-white{
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
-}
-.text-red-500{
-  --tw-text-opacity: 1;
-  color: rgb(239 68 68 / var(--tw-text-opacity));
 }
 .\!opacity-100{
   opacity: 1 !important;
@@ -1986,6 +1986,16 @@ body{
         -ms-overflow-style: none; /* IE and Edge */
         scrollbar-width: none; /* Firefox */
     }
+
+/* styles/globals.css */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#__next {
+  height: 100%;
+}
 
 /* third-party libraries CSS */
 
