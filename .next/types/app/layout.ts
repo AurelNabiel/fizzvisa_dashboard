@@ -1,4 +1,4 @@
-// File: E:\dashboard_fizzvisa\src\app\layout.tsx
+// File: D:\Project\GaweAn\fizzvisa_dashboard\src\app\layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
