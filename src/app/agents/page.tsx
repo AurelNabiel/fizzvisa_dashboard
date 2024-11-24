@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const AgentsPage: React.FC = () => {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Agents List" />
+       <Breadcrumb pageName="Agents List" />
       <Agents />;
     </DefaultLayout>
   );

@@ -2,6 +2,7 @@
 import React from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import Add from "./components/Add";
 
 const Agents: React.FC = () => {
   interface Agent {
@@ -47,12 +48,21 @@ const Agents: React.FC = () => {
           <h2 className="text-lg font-semibold text-black dark:text-white">
             Agents
           </h2>
-          <input
-            type="text"
-            placeholder="Search..."
-            className="rounded-md border bg-white px-4 py-2 text-sm text-black dark:border-strokedark dark:bg-boxdark dark:text-white"
-            onChange={(e) => getData(e.target.value)}// Update search query state
-          />
+          <div className="flex gap-x-3">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="rounded-md border bg-white px-4 py-2 text-sm text-black dark:border-strokedark dark:bg-boxdark dark:text-white"
+              onChange={(e) => {
+                if (e.target.value.length > 2) {
+                  getData(e.target.value);
+                } else {
+                  getData("");
+                }
+              }}
+            />
+            <Add getData={getData} />
+          </div>
         </div>
         <div className="max-w-full overflow-x-auto">
           <table className="w-full table-auto">
