@@ -136,7 +136,7 @@ const EditAgent: React.FC<EditProps> = ({ getData, id, name, isOpen, setIsOpen }
               type="submit"
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600"
             >
-              {status.load ? "Loading..." : "Add"}
+              {status.load ? "Loading..." : "Edit"}
             </button>
           </div>
         </form>
