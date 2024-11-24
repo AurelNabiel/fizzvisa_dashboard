@@ -1,6 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import Agents from "@/components/Agents/Agents";
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
 export const metadata: Metadata = {
   title: "Fizzvisa",
   description:
@@ -8,7 +9,11 @@ export const metadata: Metadata = {
 };
 
 const AgentsPage: React.FC = () => {
-  return <Agents />;
+  return (
+    <DefaultLayout>
+      <Agents />;
+    </DefaultLayout>
+  );
 };
 
 export default AgentsPage;
