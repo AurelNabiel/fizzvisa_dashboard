@@ -14,15 +14,19 @@ interface IFormInput {
   name: string;
 }
 
-interface AddProps {
-    getData: (key: string) => Promise<void>;
+interface EditProps {
+  getData: (key: string) => Promise<void>;
+  id: number;
+  name: string;
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
 }
 const schema = yup
   .object({
     name: yup.string().required("Name is required"),
   })
   .required();
-const Add: React.FC<AddProps> = ({ getData }) => {
+const EditAgent: React.FC<EditProps> = ({ getData, id, name, isOpen, setIsOpen }) => {
   const token = Cookies.get("token");
   const {
     register,
@@ -37,7 +41,7 @@ const Add: React.FC<AddProps> = ({ getData }) => {
     setStatus({ load: true, error: false });
     try {
       await axios
-        .post(`${process.env.NEXT_PUBLIC_DEV_API}/agent/create`, data, {
+        .put(`${process.env.NEXT_PUBLIC_DEV_API}/agent/${id}`, data, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -53,19 +57,9 @@ const Add: React.FC<AddProps> = ({ getData }) => {
       console.log(error);
     }
   };
-  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+
   return (
     <>
-      <div className="">
-        <Button
-          onClick={() => {
-            setIsOpen(true);
-          }}
-          className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
-        >
-          Add +
-        </Button>
-      </div>
       <ModalPop
         isOpen={isOpen}
         closeModalAdd={() => {
@@ -77,7 +71,7 @@ const Add: React.FC<AddProps> = ({ getData }) => {
           as="h3"
           className="mb-4 text-xl font-semibold text-gray-900 dark:text-white"
         >
-          Add Agent
+          Edit Agent
         </Dialog.Title>
 
         {/* Form Section */}
@@ -94,7 +88,7 @@ const Add: React.FC<AddProps> = ({ getData }) => {
               crossOrigin={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
-              {...register("name", { required: true })}
+              {...register("name", { required: true, value: name })}
               type="text"
               className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             />
@@ -151,4 +145,4 @@ const Add: React.FC<AddProps> = ({ getData }) => {
   );
 };
 
-export default Add;
+export default EditAgent;
