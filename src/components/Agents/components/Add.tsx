@@ -7,7 +7,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Cookies from "js-cookie";
 
-import { useForm, SubmitHandler, set } from "react-hook-form";
+import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import axios from "axios";
 
 interface IFormInput {
@@ -15,7 +15,7 @@ interface IFormInput {
 }
 
 interface AddProps {
-    getData: (key: string) => Promise<void>;
+  getData: (key: string) => Promise<void>;
 }
 const schema = yup
   .object({
@@ -29,9 +29,13 @@ const Add: React.FC<AddProps> = ({ getData }) => {
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm<IFormInput>({
     resolver: yupResolver(schema),
   });
+  const currentName = useWatch({ control, name: "name" }) || "";
+//   console.log(currentName);
+
   const [status, setStatus] = React.useState({ load: false, error: false });
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     setStatus({ load: true, error: false });
@@ -138,9 +142,13 @@ const Add: React.FC<AddProps> = ({ getData }) => {
 
             {/* Add Button */}
             <button
-              disabled={status.load}
+              disabled={status.load || !currentName.trim()} 
               type="submit"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600"
+              className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${
+                status.load || !currentName.trim()
+                  ? "cursor-not-allowed bg-gray-400"
+                  : "bg-blue-600 hover:bg-blue-700"
+              } focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600`}
             >
               {status.load ? "Loading..." : "Add"}
             </button>
