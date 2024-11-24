@@ -7,7 +7,8 @@ import { Edit, Trash } from "iconsax-react";
 import ModalPop from "../ModalPop/ModalPop";
 import EditAgent from "./components/Edit";
 import Delete from "./components/Delete";
-
+import Lottie from "react-lottie";
+import empty from "@/json/empty.json";
 interface Agent {
   id: number;
   name: string;
@@ -94,6 +95,20 @@ const Agents: React.FC = () => {
               ))}
             </tbody>
           </table>
+          {agents.length === 0 && !status.load && (
+            <div className="flex justify-center">
+              <div className="w-1/4">
+                <Lottie
+                  options={{
+                    animationData: empty,
+                    rendererSettings: {
+                      preserveAspectRatio: "xMidYMid slice",
+                    },
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
       {/* Edit */}
