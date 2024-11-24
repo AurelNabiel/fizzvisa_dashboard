@@ -51,8 +51,8 @@ const Delete: React.FC<DeleteProps> = ({
       >
         Delete Agent
       </Dialog.Title>
-      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-        Are you sure you want to delete {name}? This action cannot be undone.
+      <p className="mt-2 text-base text-gray-600 dark:text-gray-400">
+        Are you sure you want to delete "{name}"? This action cannot be undone.
       </p>
       <div className="mt-6 flex items-center justify-end space-x-3">
         <button

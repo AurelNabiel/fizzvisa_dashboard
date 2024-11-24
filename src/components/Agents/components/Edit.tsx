@@ -42,9 +42,8 @@ const EditAgent: React.FC<EditProps> = ({
     reset,
   } = useForm<IFormInput>({
     resolver: yupResolver(schema),
-    defaultValues: { name },
   });
-  const currentName = useWatch({ control, name: "name" })  || "";
+  const currentName = useWatch({ control, name: "name" }) || "";
   const [status, setStatus] = React.useState({ load: false, error: false });
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     setStatus({ load: true, error: false });
@@ -57,10 +56,10 @@ const EditAgent: React.FC<EditProps> = ({
         })
         .then((response) => {
           console.log(response.data);
-          reset();
           setStatus({ load: false, error: false });
           setIsOpen(false);
           getData("");
+          reset();
         });
     } catch (error) {
       console.log(error);
@@ -72,8 +71,8 @@ const EditAgent: React.FC<EditProps> = ({
       <ModalPop
         isOpen={isOpen}
         closeModalAdd={() => {
-          setIsOpen(false);
           reset();
+          setIsOpen(false);
         }}
       >
         <Dialog.Title
@@ -131,8 +130,8 @@ const EditAgent: React.FC<EditProps> = ({
             <button
               type="button"
               onClick={() => {
-                setIsOpen(false);
                 reset();
+                setIsOpen(false);
               }}
               className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
             >
@@ -141,7 +140,9 @@ const EditAgent: React.FC<EditProps> = ({
 
             {/* Add Button */}
             <button
-              disabled={currentName === name || status.load || !currentName.trim()}
+              disabled={
+                currentName === name || status.load || !currentName.trim()
+              }
               type="submit"
               className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${
                 currentName === name || status.load || !currentName.trim()
