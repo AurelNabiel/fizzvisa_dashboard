@@ -3,7 +3,7 @@ import React from "react";
 import type { Customers } from "./components/data/interface";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Edit, HambergerMenu, Trash } from "iconsax-react";
+import { Edit, HambergerMenu, More, Trash } from "iconsax-react";
 import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
 import Add from "./components/Add";
@@ -14,11 +14,11 @@ import {
   MenuItem,
   MenuList,
 } from "@material-tailwind/react";
+import { useRouter } from "next/navigation";
 const Customers: React.FC = () => {
   const [customers, setCustomers] = React.useState<Customers[]>([]);
   const [status, setStatus] = React.useState({ load: false, error: false });
   const token = Cookies.get("token");
-
   const getCustomers = async (key: string) => {
     setStatus({ load: true, error: false });
     try {
@@ -133,7 +133,8 @@ const CustomerList: React.FC<{
   const [deleteOpen, setDeleteOpen] = React.useState<boolean>(false);
   const decryptedRefCode = decryptData(customers.ref_code);
   // console.log(decryptedRefCode, "HAI", customers.fullname);
-
+  const route = useRouter();
+  
   return (
     <tr>
       <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
@@ -183,14 +184,26 @@ const CustomerList: React.FC<{
 
           {/* Dropdown Menu */}
           <MenuList
-            className=""
+            className="space-y-2"
             placeholder={undefined}
             onPointerEnterCapture={undefined}
             onPointerLeaveCapture={undefined}
           >
             <MenuItem
-              onClick={() => setEditOpen(true)}
+              onClick={() => {
+                route.push(`/customers/${customers.ref_code}`);
+              }}
               className="flex items-center text-sm text-gray-700 hover:bg-gray-100"
+              placeholder={undefined}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+            >
+              <More size="18" variant="Bold" className="mr-2" />
+              Detail
+            </MenuItem>
+            <MenuItem
+              onClick={() => setEditOpen(true)}
+              className="flex items-center text-sm text-green-700 hover:bg-green-100"
               placeholder={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
@@ -200,7 +213,7 @@ const CustomerList: React.FC<{
             </MenuItem>
             <MenuItem
               onClick={() => setDeleteOpen(true)}
-              className="flex items-center text-sm text-red-600 hover:bg-gray-100"
+              className="flex items-center text-sm text-red-600 hover:bg-red-100"
               placeholder={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
