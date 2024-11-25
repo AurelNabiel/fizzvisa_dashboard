@@ -15,11 +15,12 @@ import {
   MenuList,
 } from "@material-tailwind/react";
 import { useRouter } from "next/navigation";
+import DeleteCust from "./components/Delete";
 const Customers: React.FC = () => {
   const [customers, setCustomers] = React.useState<Customers[]>([]);
   const [status, setStatus] = React.useState({ load: false, error: false });
   const token = Cookies.get("token");
-  const getCustomers = async (key: string) => {
+  const getCustomers = async (key: string): Promise<void> => {
     setStatus({ load: true, error: false });
     try {
       await axios
@@ -127,104 +128,113 @@ const Customers: React.FC = () => {
 
 const CustomerList: React.FC<{
   customers: Customers;
-  getCustomers: (key: string) => void;
+  getCustomers: (key: string) => Promise<void>;
 }> = ({ customers, getCustomers }) => {
   const [editOpen, setEditOpen] = React.useState<boolean>(false);
   const [deleteOpen, setDeleteOpen] = React.useState<boolean>(false);
   const decryptedRefCode = decryptData(customers.ref_code);
   // console.log(decryptedRefCode, "HAI", customers.fullname);
   const route = useRouter();
-  
-  return (
-    <tr>
-      <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
-        <h5 className="font-medium text-black dark:text-white">
-          {decryptedRefCode}
-        </h5>
-      </td>
-      <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <p className="text-black dark:text-white">
-          {customers.first_name ?? customers.fullname ?? "Unknown"}
-        </p>
-      </td>
-      <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <p className="text-black dark:text-white">{customers.phone}</p>
-      </td>
-      <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <p className="text-black dark:text-white">{customers.email}</p>
-      </td>
-      <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <p className="text-black dark:text-white">
-          {customers.ref_code_created_date
-            ? new Date(customers.ref_code_created_date).toLocaleDateString(
-                "en-US",
-                {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                },
-              )
-            : "Date not available"}
-        </p>
-      </td>
-      <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <p className="text-black dark:text-white">
-          {customers.agent?.name ?? "Unknown"}
-        </p>
-      </td>
-      <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        {/* Dropdown Container */}
-        <Menu placement="bottom-end">
-          <MenuHandler>
-            <button className="">
-              <HambergerMenu size="24" variant="Bold" className="mr-2" />{" "}
-              {/* Burger Icon */}
-            </button>
-          </MenuHandler>
 
-          {/* Dropdown Menu */}
-          <MenuList
-            className="space-y-2"
-            placeholder={undefined}
-            onPointerEnterCapture={undefined}
-            onPointerLeaveCapture={undefined}
-          >
-            <MenuItem
-              onClick={() => {
-                route.push(`/customers/${customers.ref_code}`);
-              }}
-              className="flex items-center text-sm text-gray-700 hover:bg-gray-100"
+  return (
+    <>
+      <tr>
+        <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
+          <h5 className="font-medium text-black dark:text-white">
+            {decryptedRefCode}
+          </h5>
+        </td>
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <p className="text-black dark:text-white">
+            {customers.first_name ?? customers.fullname ?? "Unknown"}
+          </p>
+        </td>
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <p className="text-black dark:text-white">{customers.phone}</p>
+        </td>
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <p className="text-black dark:text-white">{customers.email}</p>
+        </td>
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <p className="text-black dark:text-white">
+            {customers.ref_code_created_date
+              ? new Date(customers.ref_code_created_date).toLocaleDateString(
+                  "en-US",
+                  {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  },
+                )
+              : "Date not available"}
+          </p>
+        </td>
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <p className="text-black dark:text-white">
+            {customers.agent?.name ?? "Unknown"}
+          </p>
+        </td>
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          {/* Dropdown Container */}
+          <Menu placement="bottom-end">
+            <MenuHandler>
+              <button className="">
+                <HambergerMenu size="24" variant="Bold" className="mr-2" />{" "}
+                {/* Burger Icon */}
+              </button>
+            </MenuHandler>
+
+            {/* Dropdown Menu */}
+            <MenuList
+              className="space-y-2"
               placeholder={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
             >
-              <More size="18" variant="Bold" className="mr-2" />
-              Detail
-            </MenuItem>
-            <MenuItem
-              onClick={() => setEditOpen(true)}
-              className="flex items-center text-sm text-green-700 hover:bg-green-100"
-              placeholder={undefined}
-              onPointerEnterCapture={undefined}
-              onPointerLeaveCapture={undefined}
-            >
-              <Edit size="18" variant="Bold" className="mr-2" />
-              Edit
-            </MenuItem>
-            <MenuItem
-              onClick={() => setDeleteOpen(true)}
-              className="flex items-center text-sm text-red-600 hover:bg-red-100"
-              placeholder={undefined}
-              onPointerEnterCapture={undefined}
-              onPointerLeaveCapture={undefined}
-            >
-              <Trash size="18" variant="Bold" className="mr-2" />
-              Delete
-            </MenuItem>
-          </MenuList>
-        </Menu>
-      </td>
-    </tr>
+              <MenuItem
+                onClick={() => {
+                  route.push(`/customers/${customers.ref_code}`);
+                }}
+                className="flex items-center text-sm text-gray-700 hover:bg-gray-100"
+                placeholder={undefined}
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+              >
+                <More size="18" variant="Bold" className="mr-2" />
+                Detail
+              </MenuItem>
+              <MenuItem
+                onClick={() => setEditOpen(true)}
+                className="flex items-center text-sm text-green-700 hover:bg-green-100"
+                placeholder={undefined}
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+              >
+                <Edit size="18" variant="Bold" className="mr-2" />
+                Edit
+              </MenuItem>
+              <MenuItem
+                onClick={() => setDeleteOpen(true)}
+                className="flex items-center text-sm text-red-600 hover:bg-red-100"
+                placeholder={undefined}
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+              >
+                <Trash size="18" variant="Bold" className="mr-2" />
+                Delete
+              </MenuItem>
+            </MenuList>
+          </Menu>
+        </td>
+      </tr>
+      <DeleteCust
+        id={customers.id}
+        fullname={customers.fullname ?? customers.first_name ?? "Unknown"}
+        getCustomers={getCustomers}
+        deleteOpen={deleteOpen}
+        setDeleteOpen={setDeleteOpen}
+      />
+    </>
   );
 };
 
