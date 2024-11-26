@@ -5,7 +5,6 @@ export function middleware(req: NextRequest) {
   const cookies = cookie.parse(req.headers.get("cookie") || ""); 
   const url = new URL(req.url);
   
-  console.log("cookies", cookies);
 
 
   if (!cookies.token) {
