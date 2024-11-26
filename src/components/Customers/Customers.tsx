@@ -3,7 +3,7 @@ import React from "react";
 import type { Customers } from "./components/data/interface";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Edit, HambergerMenu, More, Trash } from "iconsax-react";
+import { Edit, HambergerMenu, More, Task, Trash } from "iconsax-react";
 import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
 import Add from "./components/Add";
@@ -16,6 +16,7 @@ import {
 } from "@material-tailwind/react";
 import { useRouter } from "next/navigation";
 import DeleteCust from "./components/Delete";
+import Assign from "./components/Assign";
 const Customers: React.FC = () => {
   const [customers, setCustomers] = React.useState<Customers[]>([]);
   const [status, setStatus] = React.useState({ load: false, error: false });
@@ -130,7 +131,7 @@ const CustomerList: React.FC<{
   customers: Customers;
   getCustomers: (key: string) => Promise<void>;
 }> = ({ customers, getCustomers }) => {
-  const [editOpen, setEditOpen] = React.useState<boolean>(false);
+  const [assignOpen, setAssingOpen] = React.useState<boolean>(false);
   const [deleteOpen, setDeleteOpen] = React.useState<boolean>(false);
   const decryptedRefCode = decryptData(customers.ref_code);
   // console.log(decryptedRefCode, "HAI", customers.fullname);
@@ -204,14 +205,14 @@ const CustomerList: React.FC<{
                 Detail
               </MenuItem>
               <MenuItem
-                onClick={() => setEditOpen(true)}
+                onClick={() => setAssingOpen(true)}
                 className="flex items-center text-sm text-green-700 hover:bg-green-100"
                 placeholder={undefined}
                 onPointerEnterCapture={undefined}
                 onPointerLeaveCapture={undefined}
               >
-                <Edit size="18" variant="Bold" className="mr-2" />
-                Edit
+                <Task size="18" variant="Bold" className="mr-2" />
+                Assign
               </MenuItem>
               <MenuItem
                 onClick={() => setDeleteOpen(true)}
@@ -233,6 +234,14 @@ const CustomerList: React.FC<{
         getCustomers={getCustomers}
         deleteOpen={deleteOpen}
         setDeleteOpen={setDeleteOpen}
+      />
+      <Assign
+        ref_code={customers.ref_code}
+        getCustomers={getCustomers}
+        assignOpen={assignOpen}
+        setAssignOpen={setAssingOpen}
+        name={customers.fullname ?? customers.first_name ?? "Unknown"}
+        agent_id={customers.agent_id ?? 0}
       />
     </>
   );
