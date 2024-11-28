@@ -108,7 +108,7 @@ const Add: React.FC<AddProps> = ({ getCustomers }) => {
   const [departMinDate, setDepartMinDate] = React.useState("");
   const [returnMinDate, setReturnMinDate] = React.useState("");
   const departDate = watch("depart_date");
-  const returnDate = watch("return_date");
+  
 
   React.useEffect(() => {
     const today = new Date();
@@ -362,6 +362,7 @@ const Add: React.FC<AddProps> = ({ getCustomers }) => {
                 onPointerLeaveCapture={undefined}
                 {...register("return_date", { required: true })}
                 type="date"
+                disabled={!departDate}
                 min={returnMinDate}
                 className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3  text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               />

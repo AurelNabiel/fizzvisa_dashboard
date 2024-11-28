@@ -95,13 +95,15 @@ const Customers: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {customers.map((data, key) => (
-                <CustomerList
-                  key={key}
-                  customers={data}
-                  getCustomers={getCustomers}
-                />
-              ))}
+              {!status.load
+                ? customers.map((data, key) => (
+                    <CustomerList
+                      key={key}
+                      customers={data}
+                      getCustomers={getCustomers}
+                    />
+                  ))
+                : [...Array(5)].map((_, key) => <CustomerLoader key={key} />)}
             </tbody>
           </table>
           {customers.length === 0 && !status.load && (
@@ -243,6 +245,33 @@ const CustomerList: React.FC<{
         name={customers.fullname ?? customers.first_name ?? "Unknown"}
         agent_id={customers.agent_id ?? 0}
       />
+    </>
+  );
+};
+
+const CustomerLoader: React.FC = () => {
+  return (
+    <>
+      <tr className="animate-pulse space-x-4">
+        <td className="  px-4 py-2 pl-9">
+          <div className="h-2 w-20 rounded-full bg-slate-700"></div>
+        </td>
+        <td className="  px-4 py-2">
+          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
+        </td>
+        <td className="  px-4 py-2">
+          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
+        </td>
+        <td className="  px-4 py-2">
+          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
+        </td>
+        <td className="  px-4 py-2">
+          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
+        </td>
+        <td className="  px-4 py-2">
+          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
+        </td>
+      </tr>
     </>
   );
 };
