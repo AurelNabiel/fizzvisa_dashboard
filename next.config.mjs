@@ -7,7 +7,15 @@ const basePath =
 
 const nextConfig = {
   basePath : basePath,
-  // Remove the redirects function entirely to avoid conflicts
+  async rewrites() {
+    return [
+      {
+       
+        source: '/admin/images/:path*', // Match all requests to /admin/images/*
+        destination: '/images/:path*', // Serve them from /images/* in the public folder
+      },
+    ];
+  },
 };
 
 export default nextConfig;
