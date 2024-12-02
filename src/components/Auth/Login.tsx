@@ -9,6 +9,10 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+const basePath =
+  process.env.NEXT_PUBLIC_BASE_PATH && process.env.NEXT_PUBLIC_BASE_PATH !== "/"
+    ? process.env.NEXT_PUBLIC_BASE_PATH
+    : "";
 
 interface IFormInput {
   username: string;
@@ -72,14 +76,14 @@ const Login: React.FC = () => {
             <Link className="mb-5.5 inline-block" href="/">
               <Image
                 className="hidden dark:block"
-                src={"/images/logo/logo.svg"}
+                src={`${basePath}/images/logo/logo.svg`}
                 alt="Logo"
                 width={176}
                 height={32}
               />
               <Image
                 className="dark:hidden"
-                src={"/images/logo/logo-dark.svg"}
+                src={`${basePath}/images/logo/logo-dark.svg`}
                 alt="Logo"
                 width={176}
                 height={32}
