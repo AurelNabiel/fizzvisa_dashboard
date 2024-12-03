@@ -2,7 +2,8 @@ import React from "react";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Customers from "@/components/Customers/Customers";
-import CustomersDetail from "@/components/Customers/Details/CustomersDetail";
+import CustomerAdd from "@/components/Customers/Details/CustomerAdd";
+
 
 
 export const metadata: Metadata = {
@@ -10,12 +11,12 @@ export const metadata: Metadata = {
   description: "We provide a simple, fast, and easy online travel Visa conclerge",
 };
 
-const CustomersDetailPage: React.FC = () => {
+const CustomersAddPage: React.FC = () => {
   return (
     <DefaultLayout>
-      <CustomersDetail/>
+      <CustomerAdd/>
     </DefaultLayout>
   );
 };
 
-export default CustomersDetailPage;
+export default CustomersAddPage;

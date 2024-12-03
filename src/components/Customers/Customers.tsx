@@ -6,7 +6,8 @@ import Cookies from "js-cookie";
 import { Edit, HambergerMenu, More, Task, Trash } from "iconsax-react";
 import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
-import Add from "./components/Add";
+import { Button, Dialog } from "@headlessui/react";
+
 import { decryptData } from "./components/Decryption";
 import {
   Menu,
@@ -18,6 +19,7 @@ import { useRouter } from "next/navigation";
 import DeleteCust from "./components/Delete";
 import Assign from "./components/Assign";
 const Customers: React.FC = () => {
+  const route = useRouter();
   const [customers, setCustomers] = React.useState<Customers[]>([]);
   const [status, setStatus] = React.useState({ load: false, error: false });
   const token = Cookies.get("token");
@@ -52,7 +54,7 @@ const Customers: React.FC = () => {
       <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         <div className="flex items-center justify-between pb-4">
           <h2 className="text-lg font-semibold text-black dark:text-white">
-            Agents
+            Customers
           </h2>
           <div className="flex gap-x-3">
             <input
@@ -67,7 +69,16 @@ const Customers: React.FC = () => {
                 }
               }}
             />
-            <Add getCustomers={getCustomers} />
+            <div className="">
+              <Button
+                onClick={() => {
+                  route.push("/customers/add");
+                }}
+                className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
+              >
+                Add +
+              </Button>
+            </div>
           </div>
         </div>
         <div className="max-w-full overflow-x-auto">
