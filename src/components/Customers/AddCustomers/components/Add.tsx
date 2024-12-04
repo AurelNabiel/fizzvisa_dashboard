@@ -112,6 +112,7 @@ const Add: React.FC<AddProps> = ({ onAddCustomer }) => {
   const [departMinDate, setDepartMinDate] = React.useState("");
   const [returnMinDate, setReturnMinDate] = React.useState("");
   const departDate = watch("depart_date");
+  const ref_code = watch("ref_code");
 
   React.useEffect(() => {
     const today = new Date();
@@ -405,6 +406,7 @@ const Add: React.FC<AddProps> = ({ onAddCustomer }) => {
               crossOrigin={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
+              disabled={!ref_code}
               {...register("ref_code_created_date", { required: true })}
               type="date"
               className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3  text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
