@@ -2,7 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Customers from "@/components/Customers/Customers";
-import CustomerAdd from "@/components/Customers/Details/CustomerAdd";
+import CustomerAdd from "@/components/Customers/AddCustomers/CustomerAdd";
 
 
 
