@@ -50,6 +50,25 @@ const Customers: React.FC = () => {
     getCustomers("", page);
   }, [page]);
 
+  // select
+  const [selectedCustomers, setSelectedCustomers] = React.useState<any[]>([]);
+  const selectAll =
+    customers.length > 0 && selectedCustomers.length === customers.length;
+
+  const handleCheckboxChange = (customer: any) => {
+    setSelectedCustomers((prev) =>
+      prev.includes(customer)
+        ? prev.filter((c) => c !== customer)
+        : [...prev, customer],
+    );
+  };
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedCustomers([]); // Deselect all
+    } else {
+      setSelectedCustomers(customers); // Select all
+    }
+  };
   return (
     <>
       <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -84,6 +103,14 @@ const Customers: React.FC = () => {
           <table className="w-full table-auto">
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
+                <th className="min-w-[40px] px-4 py-4 pl-9 font-medium text-black dark:text-white xl:pl-11">
+                  <input
+                    type="checkbox"
+                    className="rounded-md border-gray-300 text-primary focus:border-primary"
+                    checked={selectAll}
+                    onChange={handleSelectAll}
+                  />
+                </th>
                 <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                   Referal Code
                 </th>
@@ -111,6 +138,9 @@ const Customers: React.FC = () => {
               {!status.load
                 ? customers.map((data, key) => (
                     <CustomerList
+                      selectedCustomers={selectedCustomers}
+                      setSelectedCustomers={setSelectedCustomers}
+                      handleCheckboxChange={handleCheckboxChange}
                       key={key}
                       customers={data}
                       getCustomers={getCustomers}
@@ -214,7 +244,17 @@ const CustomerList: React.FC<{
   currentPage?: number;
   customers: Customers;
   getCustomers: (key: string, page: number) => Promise<void>;
-}> = ({ customers, getCustomers, currentPage }) => {
+  selectedCustomers: any[];
+  setSelectedCustomers: (value: any[]) => void;
+  handleCheckboxChange: (customer: any) => void;
+}> = ({
+  customers,
+  getCustomers,
+  currentPage,
+  selectedCustomers,
+  setSelectedCustomers,
+  handleCheckboxChange,
+}) => {
   const [assignOpen, setAssingOpen] = React.useState<boolean>(false);
   const [deleteOpen, setDeleteOpen] = React.useState<boolean>(false);
   const decryptedRefCode = decryptData(customers.ref_code);
@@ -224,6 +264,16 @@ const CustomerList: React.FC<{
   return (
     <>
       <tr>
+        <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
+          <input
+            type="checkbox"
+            className="rounded-md border-gray-300 text-primary focus:border-primary"
+            checked={selectedCustomers.includes(customers)}
+            onChange={() => {
+              handleCheckboxChange(customers);
+            }}
+          />
+        </td>
         <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
           <h5 className="font-medium text-black dark:text-white">
             {decryptedRefCode}
