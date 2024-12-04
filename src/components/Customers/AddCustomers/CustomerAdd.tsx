@@ -7,6 +7,7 @@ import Import from "../components/Import";
 const CustomerAdd: React.FC = () => {
   const [customers, setCustomers] = React.useState<any[]>([]);
   const [selectedCustomers, setSelectedCustomers] = React.useState<any[]>([]);
+  
   const [status, setStatus] = React.useState<any>({
     load: false,
     error: false,
@@ -19,14 +20,21 @@ const CustomerAdd: React.FC = () => {
   };
 
   const handleCheckboxChange = (customer: any) => {
-    setSelectedCustomers(
-      (prev) =>
-        prev.includes(customer)
-          ? prev.filter((c) => c !== customer) // Remove if already selected
-          : [...prev, customer], // Add if not already selected
+    setSelectedCustomers((prev) =>
+      prev.includes(customer)
+        ? prev.filter((c) => c !== customer)
+        : [...prev, customer],
     );
   };
 
+  const selectAll = customers.length > 0 && selectedCustomers.length === customers.length;
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedCustomers([]); // Deselect all
+    } else {
+      setSelectedCustomers(customers); // Select all
+    }
+  };
   // Save selected customers
   const handleSaveSelected = async () => {
     // console.log("Saved Customers:", selectedCustomers);
@@ -69,16 +77,14 @@ const CustomerAdd: React.FC = () => {
 
           // Clear selected customers
           setSelectedCustomers([]);
-
+          
           setTimeout(() => {
             setStatus({ load: false, error: false, message: "" });
-          }
-          , 3000);
-
+          }, 3000);
         });
     } catch (error) {
       console.log(error);
-      
+
       setStatus({
         load: false,
         error: true,
@@ -86,8 +92,7 @@ const CustomerAdd: React.FC = () => {
       });
       setTimeout(() => {
         setStatus({ load: false, error: false, message: "" });
-      }
-      , 3000);
+      }, 3000);
     }
   };
 
@@ -109,10 +114,13 @@ const CustomerAdd: React.FC = () => {
           <Add onAddCustomer={handleAddCustomer} />
         </div>
       </div>
+     
       {status.message && (
         <div
           className={`mt-4 rounded-lg p-4 text-center ${
-            status.error ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+            status.error
+              ? "bg-red-100 text-red-700"
+              : "bg-green-100 text-green-700"
           }`}
         >
           {status.message}
@@ -123,6 +131,19 @@ const CustomerAdd: React.FC = () => {
         <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
           Temporary Customer List
         </h3>
+        {customers.length > 0 && (
+        <div className="mb-4 mt-4 flex items-center">
+          <input
+            type="checkbox"
+            checked={selectAll}
+            onChange={handleSelectAll}
+            className="h-5 w-5 cursor-pointer rounded border-gray-300 accent-blue-600 transition focus:ring-2 focus:ring-blue-500 dark:border-gray-600"
+          />
+          <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+            Select All
+          </label>
+        </div>
+      )}
         <div className="mt-2 rounded-lg bg-white p-4 shadow-lg dark:bg-gray-900">
           {customers.length === 0 ? (
             <p className="text-gray-500 dark:text-gray-400">
