@@ -3,52 +3,53 @@ import React from "react";
 import type { Customers } from "./components/data/interface";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Edit, HambergerMenu, More, Task, Trash } from "iconsax-react";
+import { Button } from "@headlessui/react";
 import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
-import { Button, Dialog } from "@headlessui/react";
-
+import { useRouter } from "next/navigation";
 import { decryptData } from "./components/Decryption";
+import { Edit, HambergerMenu, More, Task, Trash } from "iconsax-react";
 import {
   Menu,
   MenuHandler,
   MenuItem,
   MenuList,
 } from "@material-tailwind/react";
-import { useRouter } from "next/navigation";
 import DeleteCust from "./components/Delete";
-import Assign from "./components/Assign";
 const Customers: React.FC = () => {
   const route = useRouter();
   const [customers, setCustomers] = React.useState<Customers[]>([]);
   const [status, setStatus] = React.useState({ load: false, error: false });
+  const [page, setPage] = React.useState(1);
+  const [totalPages, setTotalPages] = React.useState(1);
   const token = Cookies.get("token");
-  const getCustomers = async (key: string): Promise<void> => {
+
+  const getCustomers = async (key: string, page: number): Promise<void> => {
     setStatus({ load: true, error: false });
     try {
-      await axios
-        .get(
-          `${process.env.NEXT_PUBLIC_DEV_API}/customer${key !== "" ? `?keyword=${key}` : ``}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_DEV_API}/customer?page=${page}&limit=10${
+          key !== "" ? `&keyword=${key}` : ""
+        }`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        )
-        .then((response) => {
-          console.log(response.data);
-          setCustomers(response.data.data);
-          setStatus({ load: false, error: false });
-        });
+        },
+      );
+      setCustomers(response.data.data);
+      setTotalPages(response.data.meta.total_docs);
+      setStatus({ load: false, error: false });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       setStatus({ load: false, error: true });
     }
   };
 
   React.useEffect(() => {
-    getCustomers("");
-  }, []);
+    getCustomers("", page);
+  }, [page]);
+
   return (
     <>
       <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -63,22 +64,20 @@ const Customers: React.FC = () => {
               className="rounded-md border bg-white px-4 py-2 text-sm text-black dark:border-strokedark dark:bg-boxdark dark:text-white"
               onChange={(e) => {
                 if (e.target.value.length > 2) {
-                  getCustomers(e.target.value);
+                  getCustomers(e.target.value, 1);
+                  setPage(1); // Reset to first page on new search
                 } else {
-                  getCustomers("");
+                  getCustomers("", 1);
+                  setPage(1);
                 }
               }}
             />
-            <div className="">
-              <Button
-                onClick={() => {
-                  route.push("/customers/add");
-                }}
-                className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
-              >
-                Add +
-              </Button>
-            </div>
+            <Button
+              onClick={() => route.push("/customers/add")}
+              className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
+            >
+              Add +
+            </Button>
           </div>
         </div>
         <div className="max-w-full overflow-x-auto">
@@ -103,6 +102,9 @@ const Customers: React.FC = () => {
                 <th className="px-4 py-4 font-medium text-black dark:text-white">
                   Agent Name
                 </th>
+                <th className="px-4 py-4 font-medium text-black dark:text-white">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -112,6 +114,7 @@ const Customers: React.FC = () => {
                       key={key}
                       customers={data}
                       getCustomers={getCustomers}
+                      currentPage={page}
                     />
                   ))
                 : [...Array(5)].map((_, key) => <CustomerLoader key={key} />)}
@@ -132,18 +135,86 @@ const Customers: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
-      {/* Edit */}
+        <div className="flex items-center justify-center pt-6">
+          <nav aria-label="Pagination" className="flex items-center space-x-2">
+            <button
+              className={`rounded-lg border px-4 py-2 ${
+                page === 1
+                  ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                  : "hover:bg-primary-dark bg-primary text-white"
+              }`}
+              disabled={page === 1}
+              onClick={() => setPage((prev) => prev - 1)}
+            >
+              Previous
+            </button>
 
-      {/* Edit */}
+            {page > 3 && (
+              <>
+                <button
+                  className="rounded-lg border bg-white px-3 py-2 text-black hover:bg-gray-200"
+                  onClick={() => setPage(1)}
+                >
+                  1
+                </button>
+                <span className="px-2 text-gray-500">...</span>
+              </>
+            )}
+
+            {Array.from(
+              { length: Math.min(5, totalPages) },
+              (_, i) => Math.max(page - 2, 1) + i,
+            )
+              .filter((p) => p <= totalPages)
+              .map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`rounded-lg border px-3 py-2 ${
+                    page === p
+                      ? "bg-primary text-white"
+                      : "bg-white text-black hover:bg-gray-200"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+
+            {page < totalPages - 2 && (
+              <>
+                <span className="px-2 text-gray-500">...</span>
+                <button
+                  className="rounded-lg border bg-white px-3 py-2 text-black hover:bg-gray-200"
+                  onClick={() => setPage(totalPages)}
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
+
+            <button
+              className={`rounded-lg border px-4 py-2 ${
+                page === totalPages
+                  ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                  : "hover:bg-primary-dark bg-primary text-white"
+              }`}
+              disabled={page === totalPages}
+              onClick={() => setPage((prev) => prev + 1)}
+            >
+              Next
+            </button>
+          </nav>
+        </div>
+      </div>
     </>
   );
 };
 
 const CustomerList: React.FC<{
+  currentPage?: number;
   customers: Customers;
-  getCustomers: (key: string) => Promise<void>;
-}> = ({ customers, getCustomers }) => {
+  getCustomers: (key: string, page: number) => Promise<void>;
+}> = ({ customers, getCustomers, currentPage }) => {
   const [assignOpen, setAssingOpen] = React.useState<boolean>(false);
   const [deleteOpen, setDeleteOpen] = React.useState<boolean>(false);
   const decryptedRefCode = decryptData(customers.ref_code);
@@ -242,19 +313,12 @@ const CustomerList: React.FC<{
         </td>
       </tr>
       <DeleteCust
+        currentPage={currentPage ?? 1}
         id={customers.id}
         fullname={customers.fullname ?? customers.first_name ?? "Unknown"}
         getCustomers={getCustomers}
         deleteOpen={deleteOpen}
         setDeleteOpen={setDeleteOpen}
-      />
-      <Assign
-        ref_code={customers.ref_code}
-        getCustomers={getCustomers}
-        assignOpen={assignOpen}
-        setAssignOpen={setAssingOpen}
-        name={customers.fullname ?? customers.first_name ?? "Unknown"}
-        agent_id={customers.agent_id ?? 0}
       />
     </>
   );

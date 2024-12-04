@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Add from "../components/Add";
+import Add from "./components/Add";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Import from "../components/Import";
