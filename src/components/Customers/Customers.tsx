@@ -38,7 +38,7 @@ const Customers: React.FC = () => {
         },
       );
       setCustomers(response.data.data);
-      setTotalPages(response.data.meta.total_docs);
+      setTotalPages(response.data.meta.total_pages);
       setStatus({ load: false, error: false });
     } catch (error) {
       console.error(error);
