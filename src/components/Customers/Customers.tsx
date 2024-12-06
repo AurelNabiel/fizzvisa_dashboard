@@ -69,6 +69,57 @@ const Customers: React.FC = () => {
       setSelectedCustomers(customers); // Select all
     }
   };
+
+  const [submitStatus, setSubmitStatus] = React.useState({
+    load: false,
+    error: false,
+    message: "",
+  });
+  const handleSubmitSelected = async () => {
+    setSubmitStatus({ load: true, error: false, message: "" });
+    try {
+      const submit = {
+        data: selectedCustomers.map((customer) => {
+          return {
+            ref_code: decryptData(customer.ref_code),
+            email: customer.email,
+            fullname: customer.fullname,
+          };
+        }),
+      };
+      console.log(submit);
+
+      await axios
+        .post(`${process.env.NEXT_PUBLIC_DEV_API}/customer/send-link`, submit, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          setSubmitStatus({
+            load: false,
+            error: false,
+            message: "Link sent successfully",
+          });
+          setSelectedCustomers([]);
+          getCustomers("", page);
+          setTimeout(() => {
+            setSubmitStatus({ load: false, error: false, message: "" });
+          }, 3000);
+        });
+    } catch (error) {
+      console.log(error);
+      setSubmitStatus({
+        load: false,
+        error: true,
+        message: "Something went wrong",
+      });
+      setTimeout(() => {
+        setSubmitStatus({ load: false, error: false, message: "" });
+      }, 3000);
+    }
+  };
   return (
     <>
       <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -99,6 +150,18 @@ const Customers: React.FC = () => {
             </Button>
           </div>
         </div>
+
+        {/* Notification Messages */}
+        {submitStatus.message && !submitStatus.error && (
+          <div className="mb-4 rounded-md bg-green-100 p-4 text-green-800">
+            {submitStatus.message}
+          </div>
+        )}
+        {submitStatus.message && submitStatus.error && (
+          <div className="mb-4 rounded-md bg-red-100 p-4 text-red-800">
+            {submitStatus.message}
+          </div>
+        )}
         <div className="max-w-full overflow-x-auto">
           <table className="w-full table-auto">
             <thead>
@@ -165,7 +228,7 @@ const Customers: React.FC = () => {
             </div>
           )}
         </div>
-        <div className="flex items-center justify-center pt-6">
+        <div className="flex items-center justify-between pb-3 pt-6">
           <nav aria-label="Pagination" className="flex items-center space-x-2">
             <button
               className={`rounded-lg border px-4 py-2 ${
@@ -174,7 +237,10 @@ const Customers: React.FC = () => {
                   : "hover:bg-primary-dark bg-primary text-white"
               }`}
               disabled={page === 1}
-              onClick={() => setPage((prev) => prev - 1)}
+              onClick={() => {
+                setPage((prev) => prev - 1);
+                setSelectedCustomers([]);
+              }}
             >
               Previous
             </button>
@@ -199,7 +265,10 @@ const Customers: React.FC = () => {
               .map((p) => (
                 <button
                   key={p}
-                  onClick={() => setPage(p)}
+                  onClick={() => {
+                    setPage(p);
+                    setSelectedCustomers([]);
+                  }}
                   className={`rounded-lg border px-3 py-2 ${
                     page === p
                       ? "bg-primary text-white"
@@ -234,6 +303,13 @@ const Customers: React.FC = () => {
               Next
             </button>
           </nav>
+          <button
+            onClick={handleSubmitSelected}
+            className={` rounded-lg border  px-4 py-2 text-white hover:bg-opacity-90 ${selectedCustomers.length === 0 || submitStatus.load ? "cursor-not-allowed bg-gray-300" : "bg-primary"}`}
+            disabled={selectedCustomers.length === 0 || submitStatus.load}
+          >
+            {submitStatus.load ? "Sending..." : "Send Link"}
+          </button>
         </div>
       </div>
     </>
@@ -338,16 +414,7 @@ const CustomerList: React.FC<{
                 <More size="18" variant="Bold" className="mr-2" />
                 Detail
               </MenuItem>
-              <MenuItem
-                onClick={() => setAssingOpen(true)}
-                className="flex items-center text-sm text-green-700 hover:bg-green-100"
-                placeholder={undefined}
-                onPointerEnterCapture={undefined}
-                onPointerLeaveCapture={undefined}
-              >
-                <Task size="18" variant="Bold" className="mr-2" />
-                Assign
-              </MenuItem>
+
               <MenuItem
                 onClick={() => setDeleteOpen(true)}
                 className="flex items-center text-sm text-red-600 hover:bg-red-100"
