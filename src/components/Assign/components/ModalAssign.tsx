@@ -17,6 +17,8 @@ import {
 } from "react-hook-form";
 interface IFormInput {
   agent_id: number;
+  email: string;
+  customer_id: number;
 }
 
 const schema = yup.object({
@@ -25,6 +27,14 @@ const schema = yup.object({
     .typeError("Agent ID must be a number")
     .min(1, "Pick an agent to assign")
     .required("Pick an agent to assign"),
+  email: yup
+    .string()
+    .email("Must be a valid email")
+    .required("Email is required"),
+  customer_id: yup
+    .number()
+    .typeError("Customer ID must be a number")
+    .required("Customer ID is required"),
 });
 
 interface AssignProps {
@@ -34,6 +44,7 @@ interface AssignProps {
   setAssignOpen: (value: boolean) => void;
   name: string;
   agent_id?: number | 0;
+  customer_id: number;
 }
 
 interface Agent {
@@ -49,6 +60,7 @@ const ModalAssign: React.FC<AssignProps> = ({
   setAssignOpen,
   name,
   agent_id,
+  customer_id,
 }) => {
   console.log(agent_id);
 
@@ -103,12 +115,20 @@ const ModalAssign: React.FC<AssignProps> = ({
   const onSubmit = async (data: IFormInput) => {
     setSubmitStatus({ load: true, error: false });
     try {
-      await axios
-        .put(
-          `${process.env.NEXT_PUBLIC_DEV_API}/customer/assign-to-agent/${ref_code}`,
+      const payload = {
+        data: [
           {
             agent_id: data.agent_id,
+            customer_id: customer_id,
+            email: data.email
           },
+        ],
+      };
+
+      await axios
+        .put(
+          `${process.env.NEXT_PUBLIC_DEV_API}/customer/assign-to-agent`,
+          payload,
           {
             headers: {
               Authorization: `Bearer ${token}`,

@@ -7,6 +7,7 @@ import { decryptData } from "./components/Decryption";
 import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
 import ModalAssign from "./components/ModalAssign";
+
 const Assign: React.FC = () => {
   const token = Cookies.get("token");
   const [submitStatus, setSubmitStatus] = React.useState({
@@ -20,6 +21,10 @@ const Assign: React.FC = () => {
   const [customers, setCustomers] = React.useState<Customers[]>([]);
   const [page, setPage] = React.useState<number>(1);
   const [totalPages, setTotalPages] = React.useState<number>(1);
+  const [selectedCustomers, setSelectedCustomers] = React.useState<any[]>([]);
+  const [loadingCheckboxes, setLoadingCheckboxes] = React.useState<
+    Record<string, boolean>
+  >({});
 
   const getCustomers = async (key: string, page: number) => {
     setStatus({ load: true, error: false });
@@ -50,65 +55,55 @@ const Assign: React.FC = () => {
     getCustomers("", page);
   }, [page]);
 
-  const [selectedCustomers, setSelectedCustomers] = React.useState<any[]>([]);
+  const handleCheckboxChange = async (customer: any) => {
+    setLoadingCheckboxes((prev) => ({ ...prev, [customer.id]: true }));
 
-  const handleCheckboxChange = (customer: any) => {
-    setSelectedCustomers((prev) =>
-      prev.includes(customer)
-        ? prev.filter((c) => c !== customer)
-        : [...prev, customer],
-    );
-  };
-
-  const handleSubmitSelected = async () => {
-    setSubmitStatus({ load: true, error: false, message: "" });
     try {
-      const submit = {
-        data: selectedCustomers.map((customer) => {
-          return {
-            ref_code: decryptData(customer.ref_code),
-            email: customer.email,
-            fullname: customer.fullname,
-          };
-        }),
-      };
-      console.log(submit);
+      const updatedCustomer = { ...customer, is_paid: !customer.is_paid };
 
-      await axios
-        .post(`${process.env.NEXT_PUBLIC_DEV_API}/customer/send-link`, submit, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          console.log(res);
-          setSubmitStatus({
-            load: false,
-            error: false,
-            message: "Link sent successfully",
-          });
-          setSelectedCustomers([]);
-          getCustomers("", page);
-          setTimeout(() => {
-            setSubmitStatus({ load: false, error: false, message: "" });
-          }, 3000);
-        });
+      // Update the selected customers list
+      setSelectedCustomers((prev) =>
+        prev.includes(customer)
+          ? prev.filter((c) => c !== customer)
+          : [...prev, customer],
+      );
+
+      // Create the payload with updated `is_paid` value
+      const payload = {
+        // email: updatedCustomer.email,
+        // phone: updatedCustomer.phone,
+        // fullname: updatedCustomer.fullname,
+        // depart_date: updatedCustomer.depart_date,
+        // return_date: updatedCustomer.return_date,
+        // ref_code_created_date: updatedCustomer.ref_code_created_date,
+        is_paid: updatedCustomer.is_paid,
+      };
+
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_DEV_API}/customer/edit/${customer.ref_code}`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      // Update the customer in the customers state directly without refetching
+      setCustomers((prevCustomers) =>
+        prevCustomers.map((c) =>
+          c.id === customer.id ? { ...c, is_paid: updatedCustomer.is_paid } : c,
+        ),
+      );
     } catch (error) {
-      console.log(error);
-      setSubmitStatus({
-        load: false,
-        error: true,
-        message: "Something went wrong",
-      });
-      setTimeout(() => {
-        setSubmitStatus({ load: false, error: false, message: "" });
-      }, 3000);
+      console.error("Error updating customer:", error);
+    } finally {
+      // Set loading state to false after the operation completes
+      setLoadingCheckboxes((prev) => ({ ...prev, [customer.id]: false }));
     }
   };
+
   return (
     <>
       <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-        {/* header */}
         <div className="flex items-center justify-between pb-4">
           <h2 className="text-lg font-semibold text-black dark:text-white">
             Assign Agent to Customer
@@ -121,7 +116,7 @@ const Assign: React.FC = () => {
               onChange={(e) => {
                 if (e.target.value.length > 2) {
                   getCustomers(e.target.value, 1);
-                  setPage(1); // Reset to first page on new search
+                  setPage(1);
                 } else {
                   getCustomers("", 1);
                   setPage(1);
@@ -130,8 +125,6 @@ const Assign: React.FC = () => {
             />
           </div>
         </div>
-        {/* header */}
-        {/* Notification Messages */}
         {submitStatus.message && !submitStatus.error && (
           <div className="mb-4 rounded-md bg-green-100 p-4 text-green-800">
             {submitStatus.message}
@@ -142,7 +135,6 @@ const Assign: React.FC = () => {
             {submitStatus.message}
           </div>
         )}
-        {/* table */}
         <div className="max-w-full overflow-x-auto">
           <table className="w-full table-auto">
             <thead>
@@ -185,8 +177,8 @@ const Assign: React.FC = () => {
                       getCustomers={getCustomers}
                       currentPage={page}
                       selectedCustomers={selectedCustomers}
-                      setSelectedCustomers={setSelectedCustomers}
                       handleCheckboxChange={handleCheckboxChange}
+                      loadingCheckboxes={loadingCheckboxes}
                     />
                   ))
                 : [...Array(5)].map((_, key) => <CustomerLoader key={key} />)}
@@ -207,7 +199,11 @@ const Assign: React.FC = () => {
             </div>
           )}
         </div>
-        <div className={`${customers.length != 0 ? "flex" : "hidden"} items-center justify-between pb-3 pt-6`}>
+
+        {/* Pagination Controls */}
+        <div
+          className={`${customers.length != 0 ? "flex" : "hidden"} items-center justify-between pb-3 pt-6`}
+        >
           <nav aria-label="Pagination" className="flex items-center space-x-2">
             <button
               className={`rounded-lg border px-4 py-2 ${
@@ -282,15 +278,7 @@ const Assign: React.FC = () => {
               Next
             </button>
           </nav>
-          <button
-            onClick={handleSubmitSelected}
-            className={` rounded-lg border  px-4 py-2 text-white hover:bg-opacity-90 ${selectedCustomers.length === 0 || submitStatus.load ? "cursor-not-allowed bg-gray-300" : "bg-primary"}`}
-            disabled={selectedCustomers.length === 0 || submitStatus.load}
-          >
-            {submitStatus.load ? "Sending..." : "Update Payment"}
-          </button>
         </div>
-        {/* table */}
       </div>
     </>
   );
@@ -298,34 +286,38 @@ const Assign: React.FC = () => {
 
 const CustomerList: React.FC<{
   customers: Customers;
-  currentPage?: number;
   getCustomers: (key: string, page: number) => Promise<void>;
+  currentPage?: number;
   selectedCustomers: any[];
-  setSelectedCustomers: (value: any[]) => void;
   handleCheckboxChange: (customer: any) => void;
+  loadingCheckboxes: Record<string, boolean>;
 }> = ({
   customers,
-  getCustomers,
-  currentPage,
-  selectedCustomers,
-  setSelectedCustomers,
   handleCheckboxChange,
+  selectedCustomers,
+  loadingCheckboxes,
+  getCustomers,
 }) => {
-  const [open, setOpen] = React.useState<boolean>(false);
   const decryptedRefCode = decryptData(customers.ref_code);
+  const [open, setOpen] = React.useState(false);
   return (
     <>
       <tr className="">
         <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
-          <input
-            type="checkbox"
-            disabled={customers.is_paid}
-            className="rounded-md border-gray-300 text-primary focus:border-primary disabled:cursor-not-allowed disabled:opacity-100"
-            checked={customers.is_paid || selectedCustomers.includes(customers)}
-            onChange={() => {
-              handleCheckboxChange(customers);
-            }}
-          />
+          {loadingCheckboxes[customers.id] ? (
+            // Loading spinner for the checkbox
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-t-2 border-gray-300"></div>
+          ) : (
+            <input
+              type="checkbox"
+              disabled={loadingCheckboxes[customers.id]}
+              className={`rounded-md border-gray-300 text-primary focus:ring-2 focus:ring-primary focus:ring-offset-1 disabled:cursor-not-allowed disabled:border-gray-400 disabled:bg-gray-200`}
+              checked={
+                customers.is_paid || selectedCustomers.includes(customers)
+              }
+              onChange={() => handleCheckboxChange(customers)}
+            />
+          )}
         </td>
         <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
           <h5 className="font-medium text-black dark:text-white">
@@ -384,6 +376,7 @@ const CustomerList: React.FC<{
         getCustomers={getCustomers}
         assignOpen={open}
         setAssignOpen={setOpen}
+        customer_id={customers.id}
         name={customers.first_name ?? customers.fullname ?? "Unknown"}
         agent_id={customers.agent_id ?? 0}
       />
@@ -393,28 +386,35 @@ const CustomerList: React.FC<{
 
 const CustomerLoader: React.FC = () => {
   return (
-    <>
-      <tr className="animate-pulse space-x-4">
-        <td className="  px-4 py-2 pl-9">
-          <div className="h-2 w-20 rounded-full bg-slate-700"></div>
-        </td>
-        <td className="  px-4 py-2">
-          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
-        </td>
-        <td className="  px-4 py-2">
-          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
-        </td>
-        <td className="  px-4 py-2">
-          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
-        </td>
-        <td className="  px-4 py-2">
-          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
-        </td>
-        <td className="  px-4 py-2">
-          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
-        </td>
-      </tr>
-    </>
+    <tr>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-8 w-8 rounded-full bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-24 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-36 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-28 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-40 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-28 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-24 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-20 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-16 rounded bg-gray-300"></div>
+      </td>
+    </tr>
   );
 };
 
