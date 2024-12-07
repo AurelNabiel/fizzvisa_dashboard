@@ -8,9 +8,10 @@ import { Dialog } from "@headlessui/react";
 interface DeleteProps {
   id: number;
   fullname: string;
-  getCustomers: (key: string) => Promise<void>;
+  getCustomers: (key: string, page: number) => Promise<void>;
   deleteOpen: boolean;
   setDeleteOpen: (value: boolean) => void;
+  currentPage: number;
 }
 
 const DeleteCust: React.FC<DeleteProps> = ({
@@ -19,6 +20,7 @@ const DeleteCust: React.FC<DeleteProps> = ({
   getCustomers,
   deleteOpen,
   setDeleteOpen,
+  currentPage
 }) => {
   const token = Cookies.get("token");
   const [status, setStatus] = React.useState({ load: false, error: false });
@@ -40,7 +42,7 @@ const DeleteCust: React.FC<DeleteProps> = ({
           console.log(response.data);
           setStatus({ load: false, error: false });
           setDeleteOpen(false);
-          getCustomers("");
+          getCustomers("", currentPage);
         });
     } catch (error) {
       console.log(error);
