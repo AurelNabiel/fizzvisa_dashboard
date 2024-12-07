@@ -207,7 +207,7 @@ const Assign: React.FC = () => {
             </div>
           )}
         </div>
-        <div className="flex items-center justify-between pb-3 pt-6">
+        <div className={`${customers.length != 0 ? "flex" : "hidden"} items-center justify-between pb-3 pt-6`}>
           <nav aria-label="Pagination" className="flex items-center space-x-2">
             <button
               className={`rounded-lg border px-4 py-2 ${
