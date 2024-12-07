@@ -51,7 +51,6 @@ const Assign: React.FC = () => {
   }, [page]);
 
   const [selectedCustomers, setSelectedCustomers] = React.useState<any[]>([]);
-  
 
   const handleCheckboxChange = (customer: any) => {
     setSelectedCustomers((prev) =>
@@ -60,7 +59,6 @@ const Assign: React.FC = () => {
         : [...prev, customer],
     );
   };
-
 
   const handleSubmitSelected = async () => {
     setSubmitStatus({ load: true, error: false, message: "" });
@@ -150,7 +148,7 @@ const Assign: React.FC = () => {
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
                 <th className="min-w-[40px] px-4 py-4 pl-9 font-medium text-black dark:text-white xl:pl-11">
-                 checkbox
+                  checkbox
                 </th>
                 <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                   Referal Code
@@ -179,27 +177,19 @@ const Assign: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {!status.load ? (
-                customers.map((customer, key) => (
-                  <CustomerList
-                    key={key}
-                    customers={customer}
-                    getCustomers={getCustomers}
-                    currentPage={page}
-                    selectedCustomers={selectedCustomers}
-                    setSelectedCustomers={setSelectedCustomers}
-                    handleCheckboxChange={handleCheckboxChange}
-                  />
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={8} className="py-4 text-center">
-                    <div className="flex items-center justify-center">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-t-[4px] border-primary"></div>
-                    </div>
-                  </td>
-                </tr>
-              )}
+              {!status.load
+                ? customers.map((customer, key) => (
+                    <CustomerList
+                      key={key}
+                      customers={customer}
+                      getCustomers={getCustomers}
+                      currentPage={page}
+                      selectedCustomers={selectedCustomers}
+                      setSelectedCustomers={setSelectedCustomers}
+                      handleCheckboxChange={handleCheckboxChange}
+                    />
+                  ))
+                : [...Array(5)].map((_, key) => <CustomerLoader key={key} />)}
             </tbody>
           </table>
           {customers.length === 0 && !status.load && (
@@ -297,7 +287,7 @@ const Assign: React.FC = () => {
             className={` rounded-lg border  px-4 py-2 text-white hover:bg-opacity-90 ${selectedCustomers.length === 0 || submitStatus.load ? "cursor-not-allowed bg-gray-300" : "bg-primary"}`}
             disabled={selectedCustomers.length === 0 || submitStatus.load}
           >
-            {submitStatus.load ? "Sending..." : "Send Link"}
+            {submitStatus.load ? "Sending..." : "Update Payment"}
           </button>
         </div>
         {/* table */}
@@ -330,7 +320,7 @@ const CustomerList: React.FC<{
           <input
             type="checkbox"
             disabled={customers.is_paid}
-             className="rounded-md border-gray-300 text-primary focus:border-primary disabled:opacity-100 disabled:cursor-not-allowed"
+            className="rounded-md border-gray-300 text-primary focus:border-primary disabled:cursor-not-allowed disabled:opacity-100"
             checked={customers.is_paid || selectedCustomers.includes(customers)}
             onChange={() => {
               handleCheckboxChange(customers);
@@ -381,7 +371,7 @@ const CustomerList: React.FC<{
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <button
-          onClick={() => setOpen(true)}
+            onClick={() => setOpen(true)}
             disabled={!customers.is_paid}
             className={`items-center rounded-full px-3 py-2 text-sm text-white ${!customers.is_paid ? "cursor-not-allowed bg-gray-300" : "bg-blue-600"} `}
           >
@@ -397,6 +387,33 @@ const CustomerList: React.FC<{
         name={customers.first_name ?? customers.fullname ?? "Unknown"}
         agent_id={customers.agent_id ?? 0}
       />
+    </>
+  );
+};
+
+const CustomerLoader: React.FC = () => {
+  return (
+    <>
+      <tr className="animate-pulse space-x-4">
+        <td className="  px-4 py-2 pl-9">
+          <div className="h-2 w-20 rounded-full bg-slate-700"></div>
+        </td>
+        <td className="  px-4 py-2">
+          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
+        </td>
+        <td className="  px-4 py-2">
+          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
+        </td>
+        <td className="  px-4 py-2">
+          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
+        </td>
+        <td className="  px-4 py-2">
+          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
+        </td>
+        <td className="  px-4 py-2">
+          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
+        </td>
+      </tr>
     </>
   );
 };
