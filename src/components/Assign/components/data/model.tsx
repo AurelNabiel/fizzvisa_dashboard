@@ -33,6 +33,7 @@ export interface Customers {
   export interface Agent {
     id: number;
     name: string;
+    email: string;
     created_by: string;
     created_at: Date;
     updated_at: Date;

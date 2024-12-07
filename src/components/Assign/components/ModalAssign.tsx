@@ -17,8 +17,6 @@ import {
 } from "react-hook-form";
 interface IFormInput {
   agent_id: number;
-  email: string;
-  customer_id: number;
 }
 
 const schema = yup.object({
@@ -27,14 +25,6 @@ const schema = yup.object({
     .typeError("Agent ID must be a number")
     .min(1, "Pick an agent to assign")
     .required("Pick an agent to assign"),
-  email: yup
-    .string()
-    .email("Must be a valid email")
-    .required("Email is required"),
-  customer_id: yup
-    .number()
-    .typeError("Customer ID must be a number")
-    .required("Customer ID is required"),
 });
 
 interface AssignProps {
@@ -51,6 +41,7 @@ interface Agent {
   id: number;
   name: string;
   created_by: string;
+  email: string;
 }
 
 const ModalAssign: React.FC<AssignProps> = ({
@@ -115,12 +106,15 @@ const ModalAssign: React.FC<AssignProps> = ({
   const onSubmit = async (data: IFormInput) => {
     setSubmitStatus({ load: true, error: false });
     try {
+      const email = agents.find((i) => i.id === data.agent_id)?.email;
+      console.log(email);
+
       const payload = {
         data: [
           {
             agent_id: data.agent_id,
             customer_id: customer_id,
-            email: data.email
+            email: email,
           },
         ],
       };
@@ -236,7 +230,11 @@ const ModalAssign: React.FC<AssignProps> = ({
         <div className="mt-6 flex items-center justify-end space-x-3">
           <Button
             type="button"
-            onClick={() => setAssignOpen(false)}
+            onClick={() => {
+              setAssignOpen(false);
+              reset();
+              setSubmitStatus({ load: false, error: false });
+            }}
             className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
           >
             Cancel

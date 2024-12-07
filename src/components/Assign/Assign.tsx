@@ -140,7 +140,7 @@ const Assign: React.FC = () => {
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
                 <th className="min-w-[40px] px-4 py-4 pl-9 font-medium text-black dark:text-white xl:pl-11">
-                  checkbox
+                 
                 </th>
                 <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                   Referal Code
