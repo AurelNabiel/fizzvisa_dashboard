@@ -492,10 +492,10 @@ const Edit: React.FC<EditProps> = ({
 
             {/* Add Button */}
             <button
-              disabled={status.load || !currentName.trim()}
+              disabled={status.load }
               type="submit"
               className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${
-                status.load || !currentName.trim()
+                status.load 
                   ? "cursor-not-allowed bg-gray-400"
                   : "bg-green-600 hover:bg-green-700"
               } focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-green-500 dark:hover:bg-green-600`}
