@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import type { Agent, Customers } from "./components/data/interface";
+import type { Agent, Customers } from "./components/data/Model";
 import axios from "axios";
 import Cookies from "js-cookie";
 import {
@@ -142,7 +142,9 @@ const Customers: React.FC = () => {
     load: false,
     error: false,
   });
-  const [selectedAgents, setSelectedAgents] = React.useState<Agent | null>(null);
+  const [selectedAgents, setSelectedAgents] = React.useState<Agent | null>(
+    null,
+  );
   const getAgents = async (): Promise<void> => {
     setAgentStatus({ load: true, error: false });
     try {
@@ -307,6 +309,9 @@ const Customers: React.FC = () => {
                 </th>
                 <th className="dark: px-4 py-4 font-medium text-black">Date</th>
                 <th className="dark: px-4 py-4 font-medium text-black">
+                  Send Status
+                </th>
+                <th className="dark: px-4 py-4 font-medium text-black">
                   Agent Name
                 </th>
                 <th className="dark: px-4 py-4 font-medium text-black">
@@ -425,7 +430,7 @@ const Customers: React.FC = () => {
           </nav>
           <button
             onClick={handleSubmitSelected}
-            className={` rounded-lg border text-white px-4 py-2  hover:bg-opacity-90 ${selectedCustomers.length === 0 || submitStatus.load ? "cursor-not-allowed bg-gray-300" : "bg-primary"}`}
+            className={` rounded-lg border px-4 py-2 text-white  hover:bg-opacity-90 ${selectedCustomers.length === 0 || submitStatus.load ? "cursor-not-allowed bg-gray-300" : "bg-primary"}`}
             disabled={selectedCustomers.length === 0 || submitStatus.load}
           >
             {submitStatus.load ? "Sending..." : "Send Link"}
@@ -498,6 +503,17 @@ const CustomerList: React.FC<{
                   },
                 )
               : "Date not available"}
+          </p>
+        </td>
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <p
+            className={`rounded-full px-3  py-1 text-center text-white  dark:text-white ${customers.send_status == null ? "bg-gray-400" : customers.send_status == "success" ? "bg-green-500" : "bg-red-500"}`}
+          >
+            {customers.send_status == null
+              ? "Not Sent"
+              : customers.send_status == "success"
+                ? "Sent"
+                : "Failed"}
           </p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">

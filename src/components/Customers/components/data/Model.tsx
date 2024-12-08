@@ -26,6 +26,8 @@ export interface Customers {
   deleted_date: null | Date;
   agent_id: number | null;
   document: Document | null;
+  send_date: Date | null;
+  send_status: null | string;
   agent: Agent | null;
 }
 

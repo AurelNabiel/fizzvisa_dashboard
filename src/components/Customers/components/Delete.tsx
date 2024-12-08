@@ -4,7 +4,7 @@ import React from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { Dialog } from "@headlessui/react";
-import { Agent } from "./data/interface";
+import { Agent } from "./data/Model";
 
 interface DeleteProps {
   id: number;
