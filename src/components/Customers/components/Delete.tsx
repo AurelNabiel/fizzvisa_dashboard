@@ -4,13 +4,16 @@ import React from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { Dialog } from "@headlessui/react";
+import { Agent } from "./data/Model";
 
 interface DeleteProps {
   id: number;
   fullname: string;
-  getCustomers: (key: string) => Promise<void>;
+  getCustomers: (key: string, page: number, agent_id: number) => Promise<void>;
   deleteOpen: boolean;
   setDeleteOpen: (value: boolean) => void;
+  currentPage: number;
+  setSelected: (value: Agent | null) => void;
 }
 
 const DeleteCust: React.FC<DeleteProps> = ({
@@ -19,6 +22,8 @@ const DeleteCust: React.FC<DeleteProps> = ({
   getCustomers,
   deleteOpen,
   setDeleteOpen,
+  currentPage,
+  setSelected
 }) => {
   const token = Cookies.get("token");
   const [status, setStatus] = React.useState({ load: false, error: false });
@@ -40,7 +45,8 @@ const DeleteCust: React.FC<DeleteProps> = ({
           console.log(response.data);
           setStatus({ load: false, error: false });
           setDeleteOpen(false);
-          getCustomers("");
+          setSelected(null);
+          getCustomers("", currentPage, 0);
         });
     } catch (error) {
       console.log(error);
