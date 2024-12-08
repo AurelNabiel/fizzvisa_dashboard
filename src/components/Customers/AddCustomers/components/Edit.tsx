@@ -134,6 +134,7 @@ const Edit: React.FC<EditProps> = ({
   const [returnMinDate, setReturnMinDate] = React.useState("");
   const departDate = watch("depart_date");
   const ref_watch = watch("ref_code");
+  console.log(return_date, "return date");
 
   React.useEffect(() => {
     const today = new Date();
@@ -147,6 +148,20 @@ const Edit: React.FC<EditProps> = ({
       setReturnMinDate(departDate);
     }
   }, [departDate]);
+
+  interface FormatDateToMMDDYYYY {
+    (date: string | Date | undefined): string;
+  }
+
+  const formatDateToMMDDYYYY: FormatDateToMMDDYYYY = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+  console.log(formatDateToMMDDYYYY(depart_date));
   return (
     <>
       <ModalPop
@@ -339,7 +354,7 @@ const Edit: React.FC<EditProps> = ({
                 onPointerLeaveCapture={undefined}
                 {...register("depart_date", {
                   required: true,
-                  value: depart_date,
+                  value: formatDateToMMDDYYYY(depart_date),
                 })}
                 type="date"
                 min={departMinDate}
@@ -381,7 +396,7 @@ const Edit: React.FC<EditProps> = ({
                 onPointerLeaveCapture={undefined}
                 {...register("return_date", {
                   required: true,
-                  value: return_date,
+                  value: formatDateToMMDDYYYY(return_date),
                 })}
                 type="date"
                 disabled={!departDate}
@@ -426,7 +441,7 @@ const Edit: React.FC<EditProps> = ({
               disabled={!ref_watch}
               {...register("ref_code_created_date", {
                 required: true,
-                value: ref_code_created_date,
+                value: formatDateToMMDDYYYY(ref_code_created_date),
               })}
               type="date"
               className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3  text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -492,10 +507,10 @@ const Edit: React.FC<EditProps> = ({
 
             {/* Add Button */}
             <button
-              disabled={status.load }
+              disabled={status.load}
               type="submit"
               className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${
-                status.load 
+                status.load
                   ? "cursor-not-allowed bg-gray-400"
                   : "bg-green-600 hover:bg-green-700"
               } focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-green-500 dark:hover:bg-green-600`}
