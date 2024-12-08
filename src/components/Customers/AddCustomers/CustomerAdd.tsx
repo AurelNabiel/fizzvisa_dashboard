@@ -3,7 +3,7 @@ import React from "react";
 import Add from "./components/Add";
 import axios from "axios";
 import Cookies from "js-cookie";
-import Import from "../components/Import";
+import Import from "./components/Import";
 import Edit from "./components/Edit";
 const CustomerAdd: React.FC = () => {
   const [customers, setCustomers] = React.useState<any[]>([]);

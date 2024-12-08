@@ -425,7 +425,7 @@ const Customers: React.FC = () => {
           </nav>
           <button
             onClick={handleSubmitSelected}
-            className={` rounded-lg border  px-4 py-2  hover:bg-opacity-90 ${selectedCustomers.length === 0 || submitStatus.load ? "cursor-not-allowed bg-gray-300" : "bg-primary"}`}
+            className={` rounded-lg border text-white px-4 py-2  hover:bg-opacity-90 ${selectedCustomers.length === 0 || submitStatus.load ? "cursor-not-allowed bg-gray-300" : "bg-primary"}`}
             disabled={selectedCustomers.length === 0 || submitStatus.load}
           >
             {submitStatus.load ? "Sending..." : "Send Link"}

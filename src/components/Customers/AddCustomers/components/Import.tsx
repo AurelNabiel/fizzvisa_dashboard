@@ -5,7 +5,8 @@ import * as XLSX from "xlsx";
 import ModalPop from "@/components/ModalPop/ModalPop";
 import axios from "axios";
 import Cookies from "js-cookie";
-
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 interface IFormInput {
   email: string;
   fullname: string;
@@ -15,6 +16,61 @@ interface IFormInput {
   return_date: string;
   ref_code_created_date?: string;
 }
+
+const schema = yup.object({
+  fullname: yup.string().required("Name is required"),
+  email: yup.string().email().required("Email is required"),
+  phone: yup
+    .string()
+    .required("Phone is required")
+    .test("len", "Phone number must be 11 digits", (val) => {
+      if (val) {
+        return val.length >= 11;
+      }
+      return false;
+    }),
+  ref_code: yup.string(),
+  depart_date: yup
+    .string()
+    .required("Depart Date is required")
+    .test(
+      "minDepart",
+      "Depart Date must be at least 3 months from today",
+      (value) => {
+        const today = new Date();
+        const departDate = new Date(value);
+        const minDepartDate = new Date(today.setMonth(today.getMonth() + 3));
+        return departDate >= minDepartDate;
+      },
+    ),
+  return_date: yup
+    .string()
+    .required("Return Date is required")
+    .test(
+      "minReturn",
+      "Return Date must be after Depart Date",
+      function (value) {
+        const departDate = new Date(this.parent.depart_date);
+        const returnDate = new Date(value);
+        return returnDate >= departDate;
+      },
+    ),
+  ref_code_created_date: yup.string().when("ref_code", {
+    is: (ref_code: string) =>
+      typeof ref_code === "string" && ref_code.trim() !== "",
+    then: (schema) =>
+      schema
+        .required("Ref Code Created Date is required")
+        .test(
+          "ref_code",
+          "Ref Code Created Date must match the provided Referral Code",
+          function (value) {
+            return value && this.parent.ref_code;
+          },
+        ),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+});
 
 interface ImportProps {
   onAddCustomer: (customer: any) => void;
@@ -41,14 +97,14 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
   };
 
   // Function to handle CSV files
-  const handleCSVFile = (content: string, file: File) => {
+  const handleCSVFile = async (content: string, file: File) => {
     Papa.parse<Record<string, string>>(content, {
       header: true,
       skipEmptyLines: true,
-      complete: (result) => {
+      complete: async (result) => {
         const data = result.data;
         const headers = Object.keys(data[0]);
-
+  
         // Update the expected headers for CSV
         const expectedHeaders = [
           "Email",
@@ -59,32 +115,16 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
           "Tanggal Pembuatan Voucher Code",
           "Voucher Code",
         ];
-
+  
         if (!areHeadersValid(headers, expectedHeaders)) {
           setErrorDocument(
             `Invalid CSV headers. Expected headers: ${expectedHeaders.join(", ")}`,
           );
           return;
         }
-
-        // Validate data for required fields
-        const validData = data.filter((entry) => {
-          return (
-            entry["Email"]?.trim() !== "" &&
-            entry["No HP"]?.trim() !== "" &&
-            entry["Nama Lengkap"]?.trim() !== "" &&
-            entry["Tanggal Keberangkatan"]?.trim() !== "" &&
-            entry["Tanggal Kepulangan"]?.trim() !== ""
-          );
-        });
-
-        if (validData.length === 0) {
-          setErrorDocument("The CSV file contains no valid data.");
-          return;
-        }
-
+  
         // Map data to match API structure
-        const formattedData = validData.map((row) => ({
+        const formattedData = data.map((row) => ({
           email: row["Email"],
           phone: row["No HP"],
           fullname: row["Nama Lengkap"],
@@ -93,9 +133,41 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
           ref_code: row["Voucher Code"] || "",
           ref_code_created_date: row["Tanggal Pembuatan Voucher Code"] || "",
         }));
-
+  
+        const validationErrors: string[] = [];
+        const validData: IFormInput[] = [];
+  
+        // Use traditional for loop instead of for...of
+        for (let index = 0; index < formattedData.length; index++) {
+          const row = formattedData[index];
+          try {
+            // Validate each row using Yup schema
+            const validatedRow = await schema.validate(row, { abortEarly: false });
+            validData.push(validatedRow);
+          } catch (err) {
+            if (err instanceof yup.ValidationError) {
+              // Collect detailed validation errors
+              validationErrors.push(
+                `Row ${index + 1}: ${err.errors.join(", ")}`
+              );
+            }
+          }
+        }
+  
+        if (validationErrors.length > 0) {
+          setErrorDocument(
+            `Validation errors:\n${validationErrors.join("\n")}`
+          );
+          return;
+        }
+  
+        if (validData.length === 0) {
+          setErrorDocument("The CSV file contains no valid data.");
+          return;
+        }
+  
         setDocs(file);
-        setDocumentData(formattedData as IFormInput[]);
+        setDocumentData(validData);
         setErrorDocument(null);
         setDisable(false);
       },
@@ -105,6 +177,8 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
       },
     });
   };
+  
+  
 
   // Function to handle XLSX file
   const handleExcelFile = (content: ArrayBuffer, file: File) => {
@@ -144,6 +218,7 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
   // Get the document when file is selected
   const getDocument = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      setDocs(null); // Reset docs
       const file = e.target.files[0];
       const allowedFileTypes = [
         "text/csv",
