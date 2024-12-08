@@ -581,26 +581,35 @@ const CustomerList: React.FC<{
 const CustomerLoader: React.FC = () => {
   return (
     <>
-      <tr className="animate-pulse space-x-4">
-        <td className="  px-4 py-2 pl-9">
-          <div className="h-2 w-20 rounded-full bg-slate-700"></div>
-        </td>
-        <td className="  px-4 py-2">
-          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
-        </td>
-        <td className="  px-4 py-2">
-          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
-        </td>
-        <td className="  px-4 py-2">
-          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
-        </td>
-        <td className="  px-4 py-2">
-          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
-        </td>
-        <td className="  px-4 py-2">
-          <div className="h-2 w-1/2 rounded-full bg-slate-700"></div>
-        </td>
-      </tr>
+       <tr>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-8 w-8 rounded-full bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-24 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-36 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-28 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-40 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-28 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-24 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-20 rounded bg-gray-300"></div>
+      </td>
+      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <div className="h-4 w-16 rounded bg-gray-300"></div>
+      </td>
+    </tr>
     </>
   );
 };
