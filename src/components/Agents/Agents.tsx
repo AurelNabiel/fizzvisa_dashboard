@@ -12,6 +12,7 @@ import empty from "@/json/empty.json";
 interface Agent {
   id: number;
   name: string;
+  email: string;
   created_by: string;
 }
 
@@ -81,6 +82,9 @@ const Agents: React.FC = () => {
                 <th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white">
                   Name
                 </th>
+                <th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white">
+                  Email
+                </th>
                 <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
                   Created By
                 </th>
@@ -132,6 +136,9 @@ const AgentItem: React.FC<{
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="text-black dark:text-white">{agent.name}</p>
+        </td>
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <p className="text-black dark:text-white">{agent.email}</p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="text-black dark:text-white">{agent.created_by}</p>

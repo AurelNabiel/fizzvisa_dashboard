@@ -12,6 +12,7 @@ import axios from "axios";
 
 interface IFormInput {
   name: string;
+  email: string;
 }
 
 interface AddProps {
@@ -20,6 +21,7 @@ interface AddProps {
 const schema = yup
   .object({
     name: yup.string().required("Name is required"),
+    email: yup.string().email("Email is invalid").required("Email is required"),
   })
   .required();
 const Add: React.FC<AddProps> = ({ getData }) => {
@@ -55,6 +57,8 @@ const Add: React.FC<AddProps> = ({ getData }) => {
         });
     } catch (error) {
       console.log(error);
+      setStatus({ load: false, error: true });
+
     }
   };
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
@@ -125,7 +129,45 @@ const Add: React.FC<AddProps> = ({ getData }) => {
               </Typography>
             )}
           </div>
-
+          <div>
+            <label
+              htmlFor="agentEmail"
+              className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Agent Email
+            </label>
+            <Input
+              crossOrigin={undefined}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+              {...register("email", { required: true })}
+              placeholder="yourmail@example.com"
+              type="email"
+              className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            />
+            {errors.email && (
+              <Typography
+                className="mt-5 flex items-center gap-2 text-sm text-red-500"
+                placeholder={undefined}
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                {errors.email.message}
+              </Typography>
+            )}
+          </div>
           {/* Buttons Section */}
           <div className="flex justify-end space-x-3">
             {/* Cancel Button */}
