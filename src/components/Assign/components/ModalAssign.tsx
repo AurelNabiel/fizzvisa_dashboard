@@ -29,7 +29,7 @@ const schema = yup.object({
 
 interface AssignProps {
   ref_code: string;
-  getCustomers: (key: string, page: number) => Promise<void>;
+  getCustomers: (key: string, page: number, agent_id: number) => Promise<void>;
   assignOpen: boolean;
   setAssignOpen: (value: boolean) => void;
   name: string;
@@ -133,7 +133,7 @@ const ModalAssign: React.FC<AssignProps> = ({
           console.log(response.data);
           setSubmitStatus({ load: false, error: false });
           setAssignOpen(false);
-          getCustomers("", 1);
+          getCustomers("", 1, 0);
         });
     } catch (error) {
       console.log(error);

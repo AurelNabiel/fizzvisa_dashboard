@@ -1,13 +1,20 @@
 "use client";
 import React from "react";
-import { Customers } from "./components/data/model";
+import { Agent, Customers } from "./components/data/model";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { decryptData } from "./components/Decryption";
 import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
 import ModalAssign from "./components/ModalAssign";
-
+import {
+  Button,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
+import { ArrowDown2 } from "iconsax-react";
 const Assign: React.FC = () => {
   const token = Cookies.get("token");
   const [submitStatus, setSubmitStatus] = React.useState({
@@ -26,14 +33,14 @@ const Assign: React.FC = () => {
     Record<string, boolean>
   >({});
 
-  const getCustomers = async (key: string, page: number) => {
+  const getCustomers = async (key: string, page: number, agent_id: number) => {
     setStatus({ load: true, error: false });
     try {
       await axios
         .get(
           `${process.env.NEXT_PUBLIC_DEV_API}/customer?page=${page}&limit=10${
             key !== "" ? `&keyword=${key}` : ""
-          }`,
+          }&${agent_id !== 0 ? `agent_ids=${agent_id}` : ""}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -51,9 +58,7 @@ const Assign: React.FC = () => {
     }
   };
 
-  React.useEffect(() => {
-    getCustomers("", page);
-  }, [page]);
+
 
   const handleCheckboxChange = async (customer: any) => {
     setLoadingCheckboxes((prev) => ({ ...prev, [customer.id]: true }));
@@ -101,6 +106,48 @@ const Assign: React.FC = () => {
     }
   };
 
+
+  // filter agent
+  const [agents, setAgents] = React.useState<Agent[]>([]);
+  const [agentStatus, setAgentStatus] = React.useState({
+    load: false,
+    error: false,
+  });
+  const [selectedAgents, setSelectedAgents] = React.useState<Agent | null>(
+    null,
+  );
+  const getAgents = async (): Promise<void> => {
+    setAgentStatus({ load: true, error: false });
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_DEV_API}/agent`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      setAgents(response.data.data);
+      setAgentStatus({ load: false, error: false });
+    } catch (error) {
+      console.error(error);
+      setAgentStatus({ load: false, error: true });
+    }
+  };
+
+  React.useEffect(() => {
+    getAgents();
+  }, []);
+
+  const handleFilter = (e: any) => {
+    console.log(e);
+    setSelectedAgents(e);
+    setPage(1);
+  };
+
+  React.useEffect(() => {
+    getCustomers("", page, selectedAgents?.id ?? 0);
+  }, [page, selectedAgents]);
   return (
     <>
       <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -115,14 +162,72 @@ const Assign: React.FC = () => {
               className="rounded-md border bg-white px-4 py-2 text-sm text-black dark:border-strokedark dark:bg-boxdark dark:text-white"
               onChange={(e) => {
                 if (e.target.value.length > 2) {
-                  getCustomers(e.target.value, 1);
+                  getCustomers(e.target.value, 1, selectedAgents?.id ?? 0);
                   setPage(1);
                 } else {
-                  getCustomers("", 1);
+                  getCustomers("", 1, selectedAgents?.id ?? 0);
                   setPage(1);
                 }
               }}
             />
+             <Listbox value={selectedAgents} onChange={handleFilter}>
+              <div className="relative">
+                <ListboxButton
+                  className={
+                    "inline-flex items-center justify-between whitespace-nowrap rounded-md bg-primary px-5 py-3 font-semibold text-white"
+                  }
+                >
+                  {selectedAgents ? selectedAgents.name : "Agents"}
+                  <ArrowDown2
+                    className="group pointer-events-none ml-2 size-4 fill-white/60"
+                    aria-hidden="true"
+                  />
+                </ListboxButton>
+                <ListboxOptions
+                  anchor="bottom"
+                  transition
+                  className={
+                    "mt-1 max-h-60 overflow-auto rounded-md bg-primary py-1 text-base text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                  }
+                >
+                  <ListboxOption
+                    value={""}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-6 pr-4 ${
+                        active ? "bg-blue-100 text-blue-900" : "text-white"
+                      }`
+                    }
+                  >
+                    <div
+                      className={`block cursor-pointer ${
+                        selectedAgents ? "font-medium" : "font-normal"
+                      }`}
+                    >
+                      Agents
+                    </div>
+                  </ListboxOption>
+                  {agents.map((person) => (
+                    <ListboxOption
+                      key={person.name}
+                      value={person}
+                      className={({ active }) =>
+                        `relative cursor-default select-none py-2 pl-6 pr-4 ${
+                          active ? "bg-blue-100 text-blue-900" : "text-white"
+                        }`
+                      }
+                    >
+                      <div
+                        className={`block cursor-pointer ${
+                          selectedAgents ? "font-medium" : "font-normal"
+                        }`}
+                      >
+                        {person.name}
+                      </div>
+                    </ListboxOption>
+                  ))}
+                </ListboxOptions>
+              </div>
+            </Listbox>
           </div>
         </div>
         {submitStatus.message && !submitStatus.error && (
@@ -286,7 +391,7 @@ const Assign: React.FC = () => {
 
 const CustomerList: React.FC<{
   customers: Customers;
-  getCustomers: (key: string, page: number) => Promise<void>;
+  getCustomers: (key: string, page: number, agent_id: number) => Promise<void>;
   currentPage?: number;
   selectedCustomers: any[];
   handleCheckboxChange: (customer: any) => void;
