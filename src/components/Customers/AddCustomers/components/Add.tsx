@@ -13,53 +13,72 @@ import axios from "axios";
 interface IFormInput {
   email: string;
   fullname: string;
-  ref_code: string;
+  ref_code?: string;
   phone: string;
   depart_date: string;
   return_date: string;
-  ref_code_created_date: string;
+  ref_code_created_date?: string;
 }
 
 interface AddProps {
-  getCustomers: (key: string) => Promise<void>;
+  // getCustomers: (key: string) => Promise<void>;
+  onAddCustomer: (customer: any) => void;
 }
-const schema = yup
-  .object({
-    fullname: yup.string().required("Name is required"),
-    email: yup.string().email().required("Email is required"),
-    phone: yup.string().required("Phone is required"),
-    ref_code: yup.string().required("Ref Code is required"),
-    depart_date: yup
-      .string()
-      .required("Depart Date is required")
-      .test(
-        "minDepart",
-        "Depart Date must be at least 3 months from today",
-        (value) => {
-          const today = new Date();
-          const departDate = new Date(value);
-          const minDepartDate = new Date(today.setMonth(today.getMonth() + 3));
-          return departDate >= minDepartDate;
-        },
-      ),
-    return_date: yup
-      .string()
-      .required("Return Date is required")
-      .test(
-        "minReturn",
-        "Return Date must be after Depart Date",
-        function (value) {
-          const departDate = new Date(this.parent.depart_date);
-          const returnDate = new Date(value);
-          return returnDate >= departDate;
-        },
-      ),
-    ref_code_created_date: yup
-      .string()
-      .required("Ref Code Created Date is required"),
-  })
-  .required();
-const Add: React.FC<AddProps> = ({ getCustomers }) => {
+const schema = yup.object({
+  fullname: yup.string().required("Name is required"),
+  email: yup.string().email().required("Email is required"),
+  phone: yup
+    .string()
+    .required("Phone is required")
+    .test("len", "Phone number must be 11 digits", (val) => {
+      if (val) {
+        return val.length >= 11;
+      }
+      return false;
+    }),
+  ref_code: yup.string(),
+  depart_date: yup
+    .string()
+    .required("Depart Date is required")
+    .test(
+      "minDepart",
+      "Depart Date must be at least 3 months from today",
+      (value) => {
+        const today = new Date();
+        const departDate = new Date(value);
+        const minDepartDate = new Date(today.setMonth(today.getMonth() + 3));
+        return departDate >= minDepartDate;
+      },
+    ),
+  return_date: yup
+    .string()
+    .required("Return Date is required")
+    .test(
+      "minReturn",
+      "Return Date must be after Depart Date",
+      function (value) {
+        const departDate = new Date(this.parent.depart_date);
+        const returnDate = new Date(value);
+        return returnDate >= departDate;
+      },
+    ),
+  ref_code_created_date: yup.string().when("ref_code", {
+    is: (ref_code: string) =>
+      typeof ref_code === "string" && ref_code.trim() !== "",
+    then: (schema) =>
+      schema
+        .required("Ref Code Created Date is required")
+        .test(
+          "ref_code",
+          "Ref Code Created Date must match the provided Referral Code",
+          function (value) {
+            return value && this.parent.ref_code;
+          },
+        ),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+});
+const Add: React.FC<AddProps> = ({ onAddCustomer }) => {
   const token = Cookies.get("token");
   const {
     register,
@@ -78,25 +97,10 @@ const Add: React.FC<AddProps> = ({ getCustomers }) => {
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     setStatus({ load: true, error: false });
     try {
-     
-
-      await axios
-        .post(
-          `${process.env.NEXT_PUBLIC_DEV_API}/customer/create`,
-          data,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        )
-        .then((response) => {
-          console.log(response.data);
-          reset();
-          setStatus({ load: false, error: false });
-          setIsOpen(false);
-          getCustomers("");
-        });
+      onAddCustomer(data);
+      reset();
+      setStatus({ load: false, error: false });
+      setIsOpen(false);
     } catch (error) {
       console.log(error);
       setStatus({ load: false, error: true });
@@ -108,7 +112,7 @@ const Add: React.FC<AddProps> = ({ getCustomers }) => {
   const [departMinDate, setDepartMinDate] = React.useState("");
   const [returnMinDate, setReturnMinDate] = React.useState("");
   const departDate = watch("depart_date");
-  
+  const ref_code = watch("ref_code");
 
   React.useEffect(() => {
     const today = new Date();
@@ -283,6 +287,7 @@ const Add: React.FC<AddProps> = ({ getCustomers }) => {
               crossOrigin={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
+              placeholder="Empty if none"
               {...register("ref_code", { required: true })}
               className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             />
@@ -309,7 +314,7 @@ const Add: React.FC<AddProps> = ({ getCustomers }) => {
               </Typography>
             )}
           </div>
-          <div className="flex w-full lg:flex-row flex-col gap-x-3">
+          <div className="flex w-full flex-col gap-x-3 lg:flex-row">
             <div className="w-full">
               <label
                 htmlFor="ref_code"
@@ -398,14 +403,14 @@ const Add: React.FC<AddProps> = ({ getCustomers }) => {
               Customers Referral Date
             </label>
             <Input
-                crossOrigin={undefined}
-                onPointerEnterCapture={undefined}
-                onPointerLeaveCapture={undefined}
-                {...register("ref_code_created_date", { required: true })}
-                type="date"
-               
-                className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3  text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-              />
+              crossOrigin={undefined}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+              disabled={!ref_code}
+              {...register("ref_code_created_date", { required: true })}
+              type="date"
+              className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3  text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            />
             {errors.ref_code_created_date && (
               <Typography
                 className="mt-5 flex items-center gap-2 text-sm text-red-500"
