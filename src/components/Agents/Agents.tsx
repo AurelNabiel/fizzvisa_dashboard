@@ -153,7 +153,11 @@ const AgentItem: React.FC<{
               />
             </button>
             <button className="hover:text-danger">
-              <Trash onClick={() => setDeleteOpen(true)} size="18" variant="Bold" />
+              <Trash
+                onClick={() => setDeleteOpen(true)}
+                size="18"
+                variant="Bold"
+              />
             </button>
           </div>
         </td>
@@ -164,6 +168,7 @@ const AgentItem: React.FC<{
         name={agent.name}
         isOpen={editOpen}
         setIsOpen={setEditOpen}
+        email={agent.email}
       />
       <Delete
         id={agent.id}
