@@ -48,11 +48,9 @@ const Login: React.FC = () => {
         .then((res) => {
           console.log(res.data);
 
-          if (res.data.message == "success") {
-            Cookies.set("token", res.data.token);
-            Cookies.set("user", JSON.stringify(res.data.data));
-            router.push(`/`);
-          }
+          Cookies.set("token", res.data.token);
+          Cookies.set("user", JSON.stringify(res.data.data));
+          router.replace(`/`);
           setSubmitStatus({ load: false, error: "" });
         });
     } catch (error) {
