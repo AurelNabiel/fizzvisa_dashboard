@@ -35,15 +35,13 @@ const ChartMostAssignedAgent: React.FC = () => {
   }, [startDate]);
   const getData = async (startDate: string, endDate: string) => {
     try {
-     
-
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_DEV_API}/dashboard/most-agent-assigned?${startDate != "" ? `start_date=${startDate}` : ""}${endDate != "" ? `&end_date=${endDate}` : ""}`,
         {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
+        },
       );
       setData(response.data.data || []);
     } catch (error) {
@@ -52,8 +50,8 @@ const ChartMostAssignedAgent: React.FC = () => {
   };
 
   useEffect(() => {
-      getData(startDate, endDate);
-    }, [startDate, endDate]);
+    getData(startDate, endDate);
+  }, [startDate, endDate]);
 
   const agentNames = data.map((item) => item.agent_name);
   const agentTotals = data.map((item) => item.total);
@@ -132,17 +130,17 @@ const ChartMostAssignedAgent: React.FC = () => {
         height={300}
       />
       <div className="mb-4 flex justify-end">
-              <Button
-                onClick={handleClear}
-                className={`text-xs font-medium text-white ${startDate === "" && endDate === "" ? "bg-gray-300" : "bg-red-500 hover:bg-red-600"}`}
-                placeholder={undefined}
-                onPointerEnterCapture={undefined}
-                onPointerLeaveCapture={undefined}
-                disabled={startDate === "" && endDate === ""}
-              >
-                Clear Dates
-              </Button>
-            </div>
+        <Button
+          onClick={handleClear}
+          className={`text-xs font-medium text-white ${startDate === "" && endDate === "" ? "bg-gray-300" : "bg-red-500 hover:bg-red-600"}`}
+          placeholder={undefined}
+          onPointerEnterCapture={undefined}
+          onPointerLeaveCapture={undefined}
+          disabled={startDate === "" && endDate === ""}
+        >
+          Clear Dates
+        </Button>
+      </div>
     </Card>
   );
 };
