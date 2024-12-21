@@ -36,11 +36,15 @@ const Add: React.FC<AddProps> = ({ getData }) => {
     resolver: yupResolver(schema),
   });
   const currentName = useWatch({ control, name: "name" }) || "";
-//   console.log(currentName);
+  //   console.log(currentName);
 
-  const [status, setStatus] = React.useState({ load: false, error: false });
+  const [status, setStatus] = React.useState({
+    load: false,
+    error: false,
+    message: "",
+  });
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    setStatus({ load: true, error: false });
+    setStatus({ load: true, error: false, message: "" });
     try {
       await axios
         .post(`${process.env.NEXT_PUBLIC_DEV_API}/agent/create`, data, {
@@ -51,14 +55,13 @@ const Add: React.FC<AddProps> = ({ getData }) => {
         .then((response) => {
           console.log(response.data);
           reset();
-          setStatus({ load: false, error: false });
+          setStatus({ load: false, error: false, message: response.data.message });
           setIsOpen(false);
           getData("");
         });
     } catch (error) {
       console.log(error);
-      setStatus({ load: false, error: true });
-
+      setStatus({ load: false, error: true, message: (error as any).message });
     }
   };
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
@@ -168,6 +171,28 @@ const Add: React.FC<AddProps> = ({ getData }) => {
               </Typography>
             )}
           </div>
+          {status.error && (
+              <Typography
+                className="mt-5 flex items-center gap-2 text-sm text-red-500"
+                placeholder={undefined}
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                {status.message}
+              </Typography>
+            )}
           {/* Buttons Section */}
           <div className="flex justify-end space-x-3">
             {/* Cancel Button */}
@@ -184,7 +209,7 @@ const Add: React.FC<AddProps> = ({ getData }) => {
 
             {/* Add Button */}
             <button
-              disabled={status.load || !currentName.trim()} 
+              disabled={status.load || !currentName.trim()}
               type="submit"
               className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${
                 status.load || !currentName.trim()
