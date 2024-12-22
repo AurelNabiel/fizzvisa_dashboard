@@ -16,6 +16,7 @@ import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
 import Add from "./components/Add";
 import DeleteUser from "./components/Delete";
+import EditUsers from "./components/Edit";
 
 const Users: React.FC = () => {
   const route = useRouter();
@@ -102,7 +103,12 @@ const Users: React.FC = () => {
             <tbody>
               {!status.load
                 ? users.map((user, key) => (
-                    <UsersList page={page} key={key} getData={getData} users={user} />
+                    <UsersList
+                      page={page}
+                      key={key}
+                      getData={getData}
+                      users={user}
+                    />
                   ))
                 : [...Array(5)].map((_, key) => <UserLoader key={key} />)}
             </tbody>
@@ -211,6 +217,7 @@ const UsersList: React.FC<{
   page: number;
 }> = ({ users, getData, page }) => {
   const [openDelete, setOpenDelete] = React.useState<boolean>(false);
+  const [openEdit, setOpenEdit] = React.useState<boolean>(false);
   return (
     <>
       <tr>
@@ -228,7 +235,9 @@ const UsersList: React.FC<{
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <div className="flex items-center space-x-3.5">
-            <button className="hover:text-meta-3">
+            <button onClick={() => {
+              setOpenEdit(true);
+            }} className="hover:text-meta-3">
               <Edit size="18" variant="Bold" />
             </button>
             <button
@@ -249,6 +258,15 @@ const UsersList: React.FC<{
         deleteOpen={openDelete}
         setDeleteOpen={setOpenDelete}
         currentPage={page}
+      />
+      <EditUsers
+        currentPage={page}
+        getData={getData}
+        id={users.id}
+        username={users.username}
+        role={users.role}
+        isOpen={openEdit}
+        setIsOpen={setOpenEdit}
       />
     </>
   );
