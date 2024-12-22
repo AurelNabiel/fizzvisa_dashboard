@@ -15,6 +15,7 @@ import { Edit, Trash } from "iconsax-react";
 import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
 import Add from "./components/Add";
+import DeleteUser from "./components/Delete";
 
 const Users: React.FC = () => {
   const route = useRouter();
@@ -101,7 +102,7 @@ const Users: React.FC = () => {
             <tbody>
               {!status.load
                 ? users.map((user, key) => (
-                    <UsersList key={key} getData={getData} users={user} />
+                    <UsersList page={page} key={key} getData={getData} users={user} />
                   ))
                 : [...Array(5)].map((_, key) => <UserLoader key={key} />)}
             </tbody>
@@ -207,8 +208,9 @@ export default Users;
 const UsersList: React.FC<{
   users: UsersModel;
   getData: (key: string, page: number) => Promise<void>;
-}> = ({ users, getData }) => {
-  const [openAdd, setOpenAdd] = React.useState<boolean>(false);
+  page: number;
+}> = ({ users, getData, page }) => {
+  const [openDelete, setOpenDelete] = React.useState<boolean>(false);
   return (
     <>
       <tr>
@@ -229,12 +231,25 @@ const UsersList: React.FC<{
             <button className="hover:text-meta-3">
               <Edit size="18" variant="Bold" />
             </button>
-            <button className="hover:text-danger">
+            <button
+              onClick={() => {
+                setOpenDelete(true);
+              }}
+              className="hover:text-danger"
+            >
               <Trash size="18" variant="Bold" />
             </button>
           </div>
         </td>
       </tr>
+      <DeleteUser
+        id={users.id}
+        fullname={users.username}
+        getData={getData}
+        deleteOpen={openDelete}
+        setDeleteOpen={setOpenDelete}
+        currentPage={page}
+      />
     </>
   );
 };
