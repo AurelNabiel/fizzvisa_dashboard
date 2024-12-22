@@ -2,7 +2,7 @@
 import React from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { UsersModel } from "./components/model";
+import { UsersModel } from "./components/data/model";
 import {
   Button,
   Listbox,
@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { Edit, Trash } from "iconsax-react";
 import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
+import Add from "./components/Add";
 
 const Users: React.FC = () => {
   const route = useRouter();
@@ -73,15 +74,13 @@ const Users: React.FC = () => {
                 }
               }}
             />
-            <Button className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90">
-              Add +
-            </Button>
+            <Add getData={getData} />
           </div>
         </div>
         <div className="max-w-full overflow-x-auto">
           <table className="w-full table-auto">
             <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
+              <tr className="bg-gray-2 text-left dark:bg-meta-4">
                 <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                   No.
                 </th>
@@ -101,7 +100,9 @@ const Users: React.FC = () => {
             </thead>
             <tbody>
               {!status.load
-                ? users.map((user, key) => <UsersList key={key} users={user} />)
+                ? users.map((user, key) => (
+                    <UsersList key={key} getData={getData} users={user} />
+                  ))
                 : [...Array(5)].map((_, key) => <UserLoader key={key} />)}
             </tbody>
           </table>
@@ -121,7 +122,7 @@ const Users: React.FC = () => {
           )}
         </div>
         <div
-          className={`${users.length != 0 || users.length > 10 ? "flex" : "hidden"} items-center justify-between pb-3 pt-6`}
+          className={`${users.length > 9 && page > 1 ? "flex" : "hidden"} items-center justify-between pb-3 pt-6`}
         >
           <nav aria-label="Pagination" className="flex items-center space-x-2">
             <button
@@ -133,7 +134,6 @@ const Users: React.FC = () => {
               disabled={page === 1}
               onClick={() => {
                 setPage((prev) => prev - 1);
-               
               }}
             >
               Previous
@@ -161,7 +161,6 @@ const Users: React.FC = () => {
                   key={p}
                   onClick={() => {
                     setPage(p);
-                  
                   }}
                   className={`rounded-lg border px-3 py-2 ${
                     page === p
@@ -197,7 +196,6 @@ const Users: React.FC = () => {
               Next
             </button>
           </nav>
-         
         </div>
       </div>
     </>
@@ -206,7 +204,11 @@ const Users: React.FC = () => {
 
 export default Users;
 
-const UsersList: React.FC<{ users: UsersModel }> = ({ users }) => {
+const UsersList: React.FC<{
+  users: UsersModel;
+  getData: (key: string, page: number) => Promise<void>;
+}> = ({ users, getData }) => {
+  const [openAdd, setOpenAdd] = React.useState<boolean>(false);
   return (
     <>
       <tr>
