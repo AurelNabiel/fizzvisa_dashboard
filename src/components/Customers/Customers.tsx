@@ -38,6 +38,16 @@ const Customers: React.FC = () => {
   const [page, setPage] = React.useState(1);
   const [totalPages, setTotalPages] = React.useState(1);
   const token = Cookies.get("token");
+  const [role, setRole] = React.useState<string>("");
+
+  React.useEffect(() => {
+    const userFromCookie = Cookies.get("user");
+    const user = userFromCookie ? JSON.parse(userFromCookie) : null;
+    // console.log(user);
+    if (user) {
+      setRole(user.role);
+    }
+  }, []);
 
   const getCustomers = async (
     key: string,
@@ -205,12 +215,14 @@ const Customers: React.FC = () => {
                 }
               }}
             />
-            <Button
-              onClick={() => route.push("/customers/add")}
-              className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
-            >
-              Add +
-            </Button>
+            {role === "admin" && (
+              <Button
+                onClick={() => route.push("/customers/add")}
+                className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
+              >
+                Add +
+              </Button>
+            )}
             <Listbox value={selectedAgents} onChange={handleFilter}>
               <div className="relative">
                 <ListboxButton
@@ -331,6 +343,7 @@ const Customers: React.FC = () => {
                       getCustomers={getCustomers}
                       currentPage={page}
                       setSelected={setSelectedAgents}
+                      role={role}
                     />
                   ))
                 : [...Array(5)].map((_, key) => <CustomerLoader key={key} />)}
@@ -449,6 +462,7 @@ const CustomerList: React.FC<{
   setSelectedCustomers: (value: any[]) => void;
   handleCheckboxChange: (customer: any) => void;
   setSelected: (value: Agent | null) => void;
+  role: string;
 }> = ({
   customers,
   getCustomers,
@@ -457,6 +471,7 @@ const CustomerList: React.FC<{
   setSelectedCustomers,
   handleCheckboxChange,
   setSelected,
+  role,
 }) => {
   const [assignOpen, setAssingOpen] = React.useState<boolean>(false);
   const [deleteOpen, setDeleteOpen] = React.useState<boolean>(false);
@@ -551,16 +566,18 @@ const CustomerList: React.FC<{
                 Detail
               </MenuItem>
 
-              <MenuItem
-                onClick={() => setDeleteOpen(true)}
-                className="flex items-center text-sm text-red-600 hover:bg-red-100"
-                placeholder={undefined}
-                onPointerEnterCapture={undefined}
-                onPointerLeaveCapture={undefined}
-              >
-                <Trash size="18" variant="Bold" className="mr-2" />
-                Delete
-              </MenuItem>
+              {role === "admin" && (
+                <MenuItem
+                  onClick={() => setDeleteOpen(true)}
+                  className="flex items-center text-sm text-red-600 hover:bg-red-100"
+                  placeholder={undefined}
+                  onPointerEnterCapture={undefined}
+                  onPointerLeaveCapture={undefined}
+                >
+                  <Trash size="18" variant="Bold" className="mr-2" />
+                  Delete
+                </MenuItem>
+              )}
             </MenuList>
           </Menu>
         </td>
@@ -581,35 +598,35 @@ const CustomerList: React.FC<{
 const CustomerLoader: React.FC = () => {
   return (
     <>
-       <tr>
-      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <div className="h-8 w-8 rounded-full bg-gray-300"></div>
-      </td>
-      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <div className="h-4 w-24 rounded bg-gray-300"></div>
-      </td>
-      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <div className="h-4 w-36 rounded bg-gray-300"></div>
-      </td>
-      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <div className="h-4 w-28 rounded bg-gray-300"></div>
-      </td>
-      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <div className="h-4 w-40 rounded bg-gray-300"></div>
-      </td>
-      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <div className="h-4 w-28 rounded bg-gray-300"></div>
-      </td>
-      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <div className="h-4 w-24 rounded bg-gray-300"></div>
-      </td>
-      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <div className="h-4 w-20 rounded bg-gray-300"></div>
-      </td>
-      <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-        <div className="h-4 w-16 rounded bg-gray-300"></div>
-      </td>
-    </tr>
+      <tr>
+        <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <div className="h-8 w-8 rounded-full bg-gray-300"></div>
+        </td>
+        <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <div className="h-4 w-24 rounded bg-gray-300"></div>
+        </td>
+        <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <div className="h-4 w-36 rounded bg-gray-300"></div>
+        </td>
+        <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <div className="h-4 w-28 rounded bg-gray-300"></div>
+        </td>
+        <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <div className="h-4 w-40 rounded bg-gray-300"></div>
+        </td>
+        <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <div className="h-4 w-28 rounded bg-gray-300"></div>
+        </td>
+        <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <div className="h-4 w-24 rounded bg-gray-300"></div>
+        </td>
+        <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <div className="h-4 w-20 rounded bg-gray-300"></div>
+        </td>
+        <td className="animate-pulse border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <div className="h-4 w-16 rounded bg-gray-300"></div>
+        </td>
+      </tr>
     </>
   );
 };
