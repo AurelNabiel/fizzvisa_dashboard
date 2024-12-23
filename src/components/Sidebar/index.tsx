@@ -7,6 +7,7 @@ import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import Cookies from "js-cookie";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -47,7 +48,6 @@ const menuGroups = [
         ),
         label: "Dashboard",
         route: "/",
-       
       },
       {
         icon: (
@@ -79,7 +79,6 @@ const menuGroups = [
         ),
         label: "Customers List",
         route: "/customers",
-       
       },
       {
         icon: (
@@ -111,7 +110,6 @@ const menuGroups = [
         ),
         label: "Agents List",
         route: "/agents",
-       
       },
       {
         icon: (
@@ -143,7 +141,6 @@ const menuGroups = [
         ),
         label: "Assign Agent",
         route: "/assign",
-       
       },
       {
         icon: (
@@ -175,7 +172,6 @@ const menuGroups = [
         ),
         label: "Users",
         route: "/users",
-       
       },
       {
         icon: (
@@ -214,13 +210,30 @@ const menuGroups = [
       },
     ],
   },
-  
 ];
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
+  const [role, setRole] = useState<string>("");
 
+  useEffect(() => {
+    const userFromCookie = Cookies.get("user");
+    const user = userFromCookie ? JSON.parse(userFromCookie) : null;
+    // console.log(user);
+    if (user) {
+      setRole(user.role);
+    }
+  }, []);
+
+  const filteredMenuGroups = menuGroups.map((group) => ({
+    ...group,
+    menuItems: group.menuItems.filter((item) => {
+      if (role === "admin") return true; // Admin sees all menu items
+      if (role === "agent" && (item.label === "Dashboard" || item.label === "Customers List")) return true; // Agent sees Dashboard and Assign Agent
+      return false; // Exclude other items
+    }),
+  }));
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside
@@ -230,8 +243,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       >
         {/* <!-- SIDEBAR HEADER --> */}
         <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-          
-
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-controls="sidebar"
@@ -257,7 +268,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
           {/* <!-- Sidebar Menu --> */}
           <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
-            {menuGroups.map((group, groupIndex) => (
+            {filteredMenuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
                 <h3 className="mb-4 ml-4 text-sm font-semibold text-white">
                   {group.name}
