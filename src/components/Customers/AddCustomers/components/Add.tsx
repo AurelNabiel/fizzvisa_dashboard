@@ -116,9 +116,9 @@ const Add: React.FC<AddProps> = ({ onAddCustomer }) => {
 
   React.useEffect(() => {
     const today = new Date();
-    const threeMonthsLater = new Date(today.setMonth(today.getMonth() + 3));
-    threeMonthsLater.setDate(threeMonthsLater.getDate() + 1);
-    setDepartMinDate(threeMonthsLater.toISOString().split("T")[0]);
+    const oneMonthLater = new Date(today.setMonth(today.getMonth() + 1));
+    oneMonthLater.setDate(oneMonthLater.getDate() + 1);
+    setDepartMinDate(oneMonthLater.toISOString().split("T")[0]);
   }, []);
 
   React.useEffect(() => {
