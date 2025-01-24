@@ -4,7 +4,7 @@ import Agents from "@/components/Agents/Agents";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 export const metadata: Metadata = {
-  title: "Fizzvisa",
+  title: "FazzVisa",
   description:
     "We provide a simple, fast, and easy online travel Visa conclerge",
 };
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const AgentsPage: React.FC = () => {
   return (
     <DefaultLayout>
-       <Breadcrumb pageName="Agents List" />
+      <Breadcrumb pageName="Agents List" />
       <Agents />;
     </DefaultLayout>
   );

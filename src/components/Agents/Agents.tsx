@@ -20,6 +20,7 @@ const Agents: React.FC = () => {
   const [agents, setAgents] = React.useState<Agent[]>([]);
   const [status, setStatus] = React.useState({ load: false, error: false });
   const token = Cookies.get("token");
+  
   const getData = async (key: string) => {
     setStatus({ load: true, error: false });
     try {
