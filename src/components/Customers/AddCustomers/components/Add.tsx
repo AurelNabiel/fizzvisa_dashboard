@@ -42,11 +42,11 @@ const schema = yup.object({
     .required("Depart Date is required")
     .test(
       "minDepart",
-      "Depart Date must be at least 3 months from today",
+      "Depart Date must be at least 1 months from today",
       (value) => {
         const today = new Date();
         const departDate = new Date(value);
-        const minDepartDate = new Date(today.setMonth(today.getMonth() + 3));
+        const minDepartDate = new Date(today.setMonth(today.getMonth() + 1));
         return departDate >= minDepartDate;
       },
     ),
