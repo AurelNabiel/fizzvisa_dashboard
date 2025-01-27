@@ -12,7 +12,7 @@ export function middleware(req: NextRequest) {
 
   if (!cookies.token) {
     if (!url.pathname.startsWith(`${basePath}/auth/signin`)) {
-      return NextResponse.redirect(new URL("/admin/auth/signin", req.url));
+      return NextResponse.redirect(new URL(`${basePath}/auth/signin`, req.url));
     }
   } else {
  
