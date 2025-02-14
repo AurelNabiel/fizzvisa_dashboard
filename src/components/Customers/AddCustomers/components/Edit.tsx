@@ -6,7 +6,8 @@ import React from "react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Cookies from "js-cookie";
-
+// @ts-expect-error
+import { useCountries } from "use-react-countries";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import axios from "axios";
 
@@ -18,6 +19,7 @@ interface IFormInput {
   depart_date: string;
   return_date: string;
   ref_code_created_date?: string;
+  destinationCountry: string;
 }
 
 interface EditProps {
@@ -30,6 +32,7 @@ interface EditProps {
   depart_date: string;
   return_date: string;
   ref_code_created_date?: string;
+  destinationCountry: string;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
   onEditCustomer: (customer: any) => void;
@@ -72,6 +75,7 @@ const schema = yup.object({
         return returnDate >= departDate;
       },
     ),
+  destinationCountry: yup.string().required("Country is required"),
   ref_code_created_date: yup.string().when("ref_code", {
     is: (ref_code: string) =>
       typeof ref_code === "string" && ref_code.trim() !== "",
@@ -97,6 +101,7 @@ const Edit: React.FC<EditProps> = ({
   depart_date,
   return_date,
   ref_code_created_date,
+  destinationCountry,
   isOpen,
   setIsOpen,
   onEditCustomer,
@@ -114,7 +119,14 @@ const Edit: React.FC<EditProps> = ({
   });
   const currentName = useWatch({ control, name: "fullname" }) || "";
   //   console.log(currentName);
-
+  const { countries } = useCountries();
+  const sortedCountries = countries
+    ? countries
+        .filter((country: { name: string }) => country.name)
+        .sort((a: { name: string }, b: { name: string }) =>
+          a.name.localeCompare(b.name),
+        )
+    : [];
   const [status, setStatus] = React.useState({ load: false, error: false });
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     setStatus({ load: true, error: false });
@@ -425,6 +437,43 @@ const Edit: React.FC<EditProps> = ({
                   {errors.return_date.message}
                 </Typography>
               )}
+            </div>
+          </div>
+          <div className="relative w-full">
+            <label
+              htmlFor="destinationCountry"
+              className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Customers Destination Country
+            </label>
+            <div className="relative">
+              <select
+                id="destinationCountry"
+                defaultValue={destinationCountry}
+                className="peer w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                {...register("destinationCountry", { required: true })}
+              >
+                <option value="" disabled>
+                  Select Destination *
+                </option>
+                {sortedCountries?.map((country: { name: string }) => (
+                  <option key={country.name} value={country.name}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+              <svg
+                className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500 peer-focus:text-blue-500"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
             </div>
           </div>
           <div>

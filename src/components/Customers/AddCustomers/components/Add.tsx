@@ -1,13 +1,15 @@
 "use client";
 import ModalPop from "@/components/ModalPop/ModalPop";
 import { Button, Dialog } from "@headlessui/react";
-import { Input, Typography } from "@material-tailwind/react";
+import { Input, Option, Select, Typography } from "@material-tailwind/react";
 import React from "react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Cookies from "js-cookie";
+// @ts-expect-error
+import { useCountries } from "use-react-countries";
 
-import { useForm, SubmitHandler, useWatch } from "react-hook-form";
+import { useForm, SubmitHandler, useWatch, Controller } from "react-hook-form";
 import axios from "axios";
 
 interface IFormInput {
@@ -17,6 +19,7 @@ interface IFormInput {
   phone: string;
   depart_date: string;
   return_date: string;
+  destinationCountry: string;
   ref_code_created_date?: string;
 }
 
@@ -62,6 +65,7 @@ const schema = yup.object({
         return returnDate >= departDate;
       },
     ),
+  destinationCountry: yup.string().required("Country is required"),
   ref_code_created_date: yup.string().when("ref_code", {
     is: (ref_code: string) =>
       typeof ref_code === "string" && ref_code.trim() !== "",
@@ -79,6 +83,14 @@ const schema = yup.object({
   }),
 });
 const Add: React.FC<AddProps> = ({ onAddCustomer }) => {
+  const { countries } = useCountries();
+  const sortedCountries = countries
+    ? countries
+        .filter((country: { name: string }) => country.name)
+        .sort((a: { name: string }, b: { name: string }) =>
+          a.name.localeCompare(b.name),
+        )
+    : [];
   const token = Cookies.get("token");
   const {
     register,
@@ -395,6 +407,44 @@ const Add: React.FC<AddProps> = ({ onAddCustomer }) => {
               )}
             </div>
           </div>
+          <div className="relative w-full">
+            <label
+              htmlFor="destinationCountry"
+              className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Customers Destination Country
+            </label>
+            <div className="relative">
+              <select
+                defaultValue={""}
+                id="destinationCountry"
+                className="peer w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                {...register("destinationCountry", { required: true })}
+              >
+                <option value="" disabled>
+                  Select Destination *
+                </option>
+                {sortedCountries?.map((country: { name: string }) => (
+                  <option key={country.name} value={country.name}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+              <svg
+                className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500 peer-focus:text-blue-500"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+
           <div>
             <label
               htmlFor="ref_code"

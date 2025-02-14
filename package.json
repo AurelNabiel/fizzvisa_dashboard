@@ -30,6 +30,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.53.2",
     "react-lottie": "^1.2.9",
+    "use-react-countries": "^2.0.1",
     "xlsx": "^0.18.5",
     "yup": "^1.4.0"
   },
