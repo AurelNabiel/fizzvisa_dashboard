@@ -52,11 +52,11 @@ const schema = yup.object({
     .required("Depart Date is required")
     .test(
       "minDepart",
-      "Depart Date must be at least 3 months from today",
+      "Depart Date must be at least a months from today",
       (value) => {
         const today = new Date();
         const departDate = new Date(value);
-        const minDepartDate = new Date(today.setMonth(today.getMonth() + 3));
+        const minDepartDate = new Date(today.setMonth(today.getMonth() + 1));
         return departDate >= minDepartDate;
       },
     ),
@@ -138,9 +138,9 @@ const Edit: React.FC<EditProps> = ({
 
   React.useEffect(() => {
     const today = new Date();
-    const threeMonthsLater = new Date(today.setMonth(today.getMonth() + 3));
-    threeMonthsLater.setDate(threeMonthsLater.getDate() + 1);
-    setDepartMinDate(threeMonthsLater.toISOString().split("T")[0]);
+    const aMonthsLater = new Date(today.setMonth(today.getMonth() + 1));
+    aMonthsLater.setDate(aMonthsLater.getDate() + 1);
+    setDepartMinDate(aMonthsLater.toISOString().split("T")[0]);
   }, []);
 
   React.useEffect(() => {
