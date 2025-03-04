@@ -15,7 +15,7 @@ interface IFormInput {
   depart_date: string;
   return_date: string;
   ref_code_created_date?: string;
-  destinationCountry: string;
+  destination: string;
 }
 
 const schema = yup.object({
@@ -56,7 +56,7 @@ const schema = yup.object({
         return returnDate >= departDate;
       },
     ),
-  destinationCountry: yup.string().required("Country is required"),
+  destination: yup.string().required("Country is required"),
   ref_code_created_date: yup.string().when("ref_code", {
     is: (ref_code: string) =>
       typeof ref_code === "string" && ref_code.trim() !== "",
@@ -137,7 +137,7 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
           return_date: row["Return Date"],
           ref_code: row["Voucher Id"] || "",
           ref_code_created_date: row["Created Date Voucher Id"] || "",
-          destinationCountry: row["Country"] || "",
+          destination: row["Country"] || "",
         }));
 
         const validationErrors: string[] = [];

@@ -19,7 +19,7 @@ interface IFormInput {
   depart_date: string;
   return_date: string;
   ref_code_created_date?: string;
-  destinationCountry: string;
+  destination: string;
 }
 
 interface EditProps {
@@ -32,7 +32,7 @@ interface EditProps {
   depart_date: string;
   return_date: string;
   ref_code_created_date?: string;
-  destinationCountry: string;
+  destination: string;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
   onEditCustomer: (customer: any) => void;
@@ -75,7 +75,7 @@ const schema = yup.object({
         return returnDate >= departDate;
       },
     ),
-  destinationCountry: yup.string().required("Country is required"),
+  destination: yup.string().required("Country is required"),
   ref_code_created_date: yup.string().when("ref_code", {
     is: (ref_code: string) =>
       typeof ref_code === "string" && ref_code.trim() !== "",
@@ -101,7 +101,7 @@ const Edit: React.FC<EditProps> = ({
   depart_date,
   return_date,
   ref_code_created_date,
-  destinationCountry,
+  destination,
   isOpen,
   setIsOpen,
   onEditCustomer,
@@ -441,17 +441,17 @@ const Edit: React.FC<EditProps> = ({
           </div>
           <div className="relative w-full">
             <label
-              htmlFor="destinationCountry"
+              htmlFor="destination"
               className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Customers Destination Country
             </label>
             <div className="relative">
               <select
-                id="destinationCountry"
-                defaultValue={destinationCountry}
+                id="destination"
+                defaultValue={destination}
                 className="peer w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                {...register("destinationCountry", { required: true })}
+                {...register("destination", { required: true })}
               >
                 <option value="" disabled>
                   Select Destination *
