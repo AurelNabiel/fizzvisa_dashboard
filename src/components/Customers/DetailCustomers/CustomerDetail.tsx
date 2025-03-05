@@ -255,7 +255,11 @@ const CustomerDetail: React.FC = () => {
                     <p className="text-sm font-medium">{doc.label}</p>
                     <p className="text-xs text-gray-500">{doc.name}</p>
                   </div>
-                  <button disabled={doc.name == "Not Uploaded" ? true : false} className={`border-none bg-transparent p-1 ${doc.name == "Not Uploaded" ? "text-gray-500" : "text-orange-500"}`} onClick={() => window.open(doc.name, "_blank")}>
+                  <button
+                    disabled={doc.name == "Not Uploaded" ? true : false}
+                    className={`border-none bg-transparent p-1 ${doc.name == "Not Uploaded" ? "text-gray-500" : "text-orange-500"}`}
+                    onClick={() => window.open(doc.name, "_blank")}
+                  >
                     View
                   </button>
                 </div>
