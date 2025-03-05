@@ -240,6 +240,7 @@ const CustomerList: React.FC<{
               <div className="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
                 <span>✉️ {customer.email}</span>
                 <span>📞 {customer.phone}</span>
+                <span>🚩 {customer.destination}</span>
                 <span>
                   🗓 Depart:{" "}
                   {new Date(customer.depart_date).toISOString().split("T")[0]}
@@ -329,6 +330,7 @@ const CustomerList: React.FC<{
         setIsOpen={setOpenEdit}
         ref_code={customer.ref_code}
         ref_code_created_date={customer.ref_code_created_date}
+        destination={customer.destination}
         onEditCustomer={onEditCustomer}
       />
     </>

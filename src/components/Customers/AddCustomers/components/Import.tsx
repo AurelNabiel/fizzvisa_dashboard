@@ -15,6 +15,7 @@ interface IFormInput {
   depart_date: string;
   return_date: string;
   ref_code_created_date?: string;
+  destination: string;
 }
 
 const schema = yup.object({
@@ -35,11 +36,11 @@ const schema = yup.object({
     .required("Depart Date is required")
     .test(
       "minDepart",
-      "Depart Date must be at least 3 months from today",
+      "Depart Date must be at least a month from today",
       (value) => {
         const today = new Date();
         const departDate = new Date(value);
-        const minDepartDate = new Date(today.setMonth(today.getMonth() + 3));
+        const minDepartDate = new Date(today.setMonth(today.getMonth() + 1));
         return departDate >= minDepartDate;
       },
     ),
@@ -55,6 +56,7 @@ const schema = yup.object({
         return returnDate >= departDate;
       },
     ),
+  destination: yup.string().required("Country is required"),
   ref_code_created_date: yup.string().when("ref_code", {
     is: (ref_code: string) =>
       typeof ref_code === "string" && ref_code.trim() !== "",
@@ -104,68 +106,74 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
       complete: async (result) => {
         const data = result.data;
         const headers = Object.keys(data[0]);
-  
+
         // Update the expected headers for CSV
         const expectedHeaders = [
-          "Email",
-          "No HP",
-          "Nama Lengkap",
-          "Tanggal Keberangkatan",
-          "Tanggal Kepulangan",
-          "Tanggal Pembuatan Voucher Code",
-          "Voucher Code",
+          "E-mail",
+          "Mobile Phone",
+          "Name",
+          "Depart Date",
+          "Return Date",
+          "Created Date Voucher Id",
+          "Voucher Id",
+          "Country",
         ];
-  
+
         if (!areHeadersValid(headers, expectedHeaders)) {
+          console.log("Invalid headers", headers, data);
+          
           setErrorDocument(
             `Invalid CSV headers. Expected headers: ${expectedHeaders.join(", ")}`,
           );
           return;
         }
-  
+
         // Map data to match API structure
         const formattedData = data.map((row) => ({
-          email: row["Email"],
-          phone: row["No HP"],
-          fullname: row["Nama Lengkap"],
-          depart_date: row["Tanggal Keberangkatan"],
-          return_date: row["Tanggal Kepulangan"],
-          ref_code: row["Voucher Code"] || "",
-          ref_code_created_date: row["Tanggal Pembuatan Voucher Code"] || "",
+          email: row["E-mail"],
+          phone: row["Mobile Phone"],
+          fullname: row["Name"],
+          depart_date: row["Depart Date"],
+          return_date: row["Return Date"],
+          ref_code: row["Voucher Id"] || "",
+          ref_code_created_date: row["Created Date Voucher Id"] || "",
+          destination: row["Country"] || "",
         }));
-  
+
         const validationErrors: string[] = [];
         const validData: IFormInput[] = [];
-  
+
         // Use traditional for loop instead of for...of
         for (let index = 0; index < formattedData.length; index++) {
           const row = formattedData[index];
           try {
             // Validate each row using Yup schema
-            const validatedRow = await schema.validate(row, { abortEarly: false });
+            const validatedRow = await schema.validate(row, {
+              abortEarly: false,
+            });
             validData.push(validatedRow);
           } catch (err) {
             if (err instanceof yup.ValidationError) {
               // Collect detailed validation errors
               validationErrors.push(
-                `Row ${index + 1}: ${err.errors.join(", ")}`
+                `Row ${index + 1}: ${err.errors.join(", ")}`,
               );
             }
           }
         }
-  
+
         if (validationErrors.length > 0) {
           setErrorDocument(
-            `Validation errors:\n${validationErrors.join("\n")}`
+            `Validation errors:\n${validationErrors.join("\n")}`,
           );
           return;
         }
-  
+
         if (validData.length === 0) {
           setErrorDocument("The CSV file contains no valid data.");
           return;
         }
-  
+
         setDocs(file);
         setDocumentData(validData);
         setErrorDocument(null);
@@ -177,8 +185,6 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
       },
     });
   };
-  
-  
 
   // Function to handle XLSX file
   const handleExcelFile = (content: ArrayBuffer, file: File) => {
