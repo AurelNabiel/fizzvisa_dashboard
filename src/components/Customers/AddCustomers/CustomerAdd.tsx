@@ -17,6 +17,8 @@ const CustomerAdd: React.FC = () => {
   // Add a new customer to the list
   const handleAddCustomer = (customer: any) => {
     setCustomers((prev) => [...prev, customer]);
+    console.log(customer);
+    
   };
 
   const handleCheckboxChange = (customer: any) => {
@@ -212,7 +214,7 @@ const CustomerList: React.FC<{
   onEditCustomer
 }) => {
   const [openEdit, setOpenEdit] = React.useState<boolean>(false);
-  console.log(customer);
+  // console.log(customer);
 
   return (
     <>
