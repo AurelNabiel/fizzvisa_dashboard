@@ -153,11 +153,11 @@ const EditUsers: React.FC<EditProps> = ({
               htmlFor="role"
               className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              User Type
+              Role
             </label>
             <div className="relative">
               <select
-                {...register("user_type", { required: true, value: user_type })}
+                {...register("role", { required: true, value: role })}
                 className="ease w-full cursor-pointer appearance-none rounded border border-slate-200 bg-transparent py-2 pl-3 pr-8 text-sm text-slate-700 shadow-sm transition duration-300 placeholder:text-slate-400 hover:border-slate-400 focus:border-slate-400 focus:shadow-md focus:outline-none"
               >
                 <option value="admin">Admin</option>
@@ -208,19 +208,19 @@ const EditUsers: React.FC<EditProps> = ({
               htmlFor="role"
               className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Role
+              User Type
             </label>
             <Input
               crossOrigin={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
-              {...register("role", { required: true, value: role })}
+              {...register("user_type", { required: true, value: role })}
               type="text"
               placeholder="admin, agent, user"
               autoComplete="false"
               className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             />
-            {errors.role && (
+            {errors.user_type && (
               <Typography
                 className="mt-5 flex items-center gap-2 text-sm text-red-500"
                 placeholder={undefined}
@@ -239,7 +239,7 @@ const EditUsers: React.FC<EditProps> = ({
                     clip-rule="evenodd"
                   ></path>
                 </svg>
-                {errors.role.message}
+                {errors.user_type.message}
               </Typography>
             )}
           </div>

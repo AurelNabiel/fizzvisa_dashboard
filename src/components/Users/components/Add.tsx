@@ -38,14 +38,14 @@ const schema = yup.object({
     .min(8, "Password must be at least 8 characters")
     .required("Password is required"),
   user_type: yup.string().required("User type is required"),
-
-  agent_id: yup.number().when("user_type", (user_type, schema) => {
-    return user_type[0] === "agent"
+  
+  role: yup.string().required("Role is required"),
+  agent_id: yup.number().when("role", (role, schema) => {
+    return role[0] === "agent"
       ? schema.required("Agent ID is required")
       : schema.notRequired();
   }),
 
-  role: yup.string().required("Role is required"),
 });
 const Add: React.FC<AddProps> = ({ getData }) => {
   const token = Cookies.get("token");
@@ -60,7 +60,7 @@ const Add: React.FC<AddProps> = ({ getData }) => {
     resolver: yupResolver(schema),
   });
   const currentName = useWatch({ control, name: "username" }) || "";
-  const currentUserType = useWatch({ control, name: "user_type" }) || "";
+  const currentRole = useWatch({ control, name: "role" }) || "";
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   //   console.log(currentName);
   const [agent, setAgent] = React.useState<{
@@ -265,14 +265,14 @@ const Add: React.FC<AddProps> = ({ getData }) => {
               htmlFor="role"
               className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              User Type
+              Role
             </label>
             <div className="relative">
               <select
-                {...register("user_type", { required: true })}
+                {...register("role", { required: true })}
                 className="ease w-full cursor-pointer appearance-none rounded border border-slate-200 bg-transparent py-2 pl-3 pr-8 text-sm text-slate-700 shadow-sm transition duration-300 placeholder:text-slate-400 hover:border-slate-400 focus:border-slate-400 focus:shadow-md focus:outline-none"
               >
-                <option value="">Pick a user type</option>
+                <option value="">Pick a role</option>
                 <option value="admin">Admin</option>
                 <option value="agent">Agent</option>
               </select>
@@ -291,7 +291,7 @@ const Add: React.FC<AddProps> = ({ getData }) => {
                 />
               </svg>
             </div>
-            {errors.user_type && (
+            {errors.role && (
               <Typography
                 className="mt-5 flex items-center gap-2 text-sm text-red-500"
                 placeholder={undefined}
@@ -310,11 +310,11 @@ const Add: React.FC<AddProps> = ({ getData }) => {
                     clip-rule="evenodd"
                   ></path>
                 </svg>
-                {errors.user_type.message}
+                {errors.role.message}
               </Typography>
             )}
           </div>
-          {currentUserType === "agent" && (
+          {currentRole === "agent" && (
             <div>
               <label
                 htmlFor="role"
@@ -378,19 +378,19 @@ const Add: React.FC<AddProps> = ({ getData }) => {
               htmlFor="username"
               className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Role
+              User Type
             </label>
             <Input
               crossOrigin={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
-              {...register("role", { required: true })}
+              {...register("user_type", { required: true })}
               type="text"
               placeholder="admin, agent, user"
               autoComplete="false"
               className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             />
-            {errors.role && (
+            {errors.user_type && (
               <Typography
                 className="mt-5 flex items-center gap-2 text-sm text-red-500"
                 placeholder={undefined}
@@ -409,7 +409,7 @@ const Add: React.FC<AddProps> = ({ getData }) => {
                     clip-rule="evenodd"
                   ></path>
                 </svg>
-                {errors.role.message}
+                {errors.user_type.message}
               </Typography>
             )}
           </div>
