@@ -12,7 +12,7 @@ import axios from "axios";
 
 interface IFormInput {
   username: string;
-
+  user_type: string;
   role: string;
 }
 
@@ -21,6 +21,8 @@ interface EditProps {
   id: number;
   username: string;
   currentPage: number;
+  user_type: string;
+
   role: string;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
@@ -29,6 +31,7 @@ const schema = yup
   .object({
     username: yup.string().required("Username is required"),
 
+    user_type: yup.string().required("User type is required"),
     role: yup.string().required("Role is required"),
   })
   .required();
@@ -37,6 +40,7 @@ const EditUsers: React.FC<EditProps> = ({
   id,
   username,
   role,
+  user_type,
   isOpen,
   currentPage,
   setIsOpen,
@@ -132,7 +136,59 @@ const EditUsers: React.FC<EditProps> = ({
               </Typography>
             )}
           </div>
-
+          <div>
+            <label
+              htmlFor="role"
+              className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              User Type
+            </label>
+            <div className="relative">
+              <select
+                {...register("user_type", { required: true, value: user_type })}
+                className="ease w-full cursor-pointer appearance-none rounded border border-slate-200 bg-transparent py-2 pl-3 pr-8 text-sm text-slate-700 shadow-sm transition duration-300 placeholder:text-slate-400 hover:border-slate-400 focus:border-slate-400 focus:shadow-md focus:outline-none"
+              >
+                <option value="admin">Admin</option>
+                <option value="agent">Agent</option>
+              </select>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.2"
+                stroke="currentColor"
+                className="absolute right-2.5 top-2.5 ml-1 h-5 w-5 text-slate-700"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
+                />
+              </svg>
+            </div>
+            {errors.role && (
+              <Typography
+                className="mt-5 flex items-center gap-2 text-sm text-red-500"
+                placeholder={undefined}
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                {errors.role.message}
+              </Typography>
+            )}
+          </div>
           <div>
             <label
               htmlFor="role"

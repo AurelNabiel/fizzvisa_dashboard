@@ -1,6 +1,7 @@
 export interface UsersModel {
-    id:       number;
-    username: string;
-    email:    string;
-    role:     string;
+  id: number;
+  username: string;
+  user_type: string;
+  email: string;
+  role: string;
 }

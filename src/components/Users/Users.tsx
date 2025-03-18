@@ -260,6 +260,7 @@ const UsersList: React.FC<{
         currentPage={page}
       />
       <EditUsers
+        user_type={users.user_type}
         currentPage={page}
         getData={getData}
         id={users.id}
