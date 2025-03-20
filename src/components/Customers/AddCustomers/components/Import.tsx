@@ -294,7 +294,13 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
         }
       } else {
         // Process the CSV data and submit to the API
-        documentData.forEach((entry) => onAddCustomer(entry));
+        documentData.forEach((entry) => {
+          const submitData = {
+            ...entry,
+            first_name: entry.fullname.split(" ")[0],
+          };
+          onAddCustomer(submitData);
+        });
         setIsLoading(false);
         setErrorDocument(null);
         setDocumentData([]);

@@ -109,7 +109,11 @@ const Add: React.FC<AddProps> = ({ onAddCustomer }) => {
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     setStatus({ load: true, error: false });
     try {
-      onAddCustomer(data);
+      const submitData = {
+        ...data,
+        first_name : data.fullname.split(" ")[0],
+      }
+      onAddCustomer(submitData);
       reset();
       setStatus({ load: false, error: false });
       setIsOpen(false);

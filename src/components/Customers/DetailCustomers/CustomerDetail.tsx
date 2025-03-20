@@ -159,32 +159,32 @@ const CustomerDetail: React.FC = () => {
               {/* Referral & Phone */}
               <div className="flex w-full justify-center gap-x-3 text-2xl font-bold">
                 <div className="flex flex-1 flex-col gap-y-2 rounded-xl bg-[#FF7800] px-5 py-6">
-                  <h1 className="text-lg font-semibold">Referral Code</h1>
+                  <h1 className="text-xl font-semibold">Referral Code</h1>
                   <div className="border-b-2"></div>
-                  <h2 className="text-xl">{details.referralCode}</h2>
+                  <h2 className="text-2xl">{details.referralCode}</h2>
                 </div>
                 <div className="flex flex-1 flex-col gap-y-2 rounded-xl bg-[#FF7800] px-5 py-6">
-                  <h1 className="text-lg font-semibold">Phone Number</h1>
+                  <h1 className="text-xl font-semibold">Phone Number</h1>
                   <div className="border-b-2"></div>
-                  <h2 className="text-xl">{details.phoneNumber}</h2>
+                  <h2 className="text-2xl">{details.phoneNumber}</h2>
                 </div>
               </div>
 
               {/* Personal Information */}
               <div className="flex flex-1 flex-col gap-y-2 rounded-xl bg-[#FF7800] px-5 py-6">
-                <h1 className="text-lg font-semibold">Personal Information</h1>
+                <h1 className="text-2xl font-semibold">Personal Information</h1>
                 <div className="border-b-2"></div>
                 <div className="grid grid-cols-2 gap-y-2">
-                  <span className="font-medium">Name</span>
+                  <span className="font-medium text-lg">Name</span>
                   <span>: {details.name}</span>
 
-                  <span className="font-medium">Email</span>
+                  <span className="font-medium text-lg">Email</span>
                   <span>: {details.email}</span>
 
-                  <span className="font-medium">Marital Status</span>
+                  <span className="font-medium text-lg">Marital Status</span>
                   <span>: {details.maritalStatus}</span>
 
-                  <span className="font-medium">Address</span>
+                  <span className="font-medium text-lg">Address</span>
                   <span>: {details.address}</span>
                 </div>
               </div>
@@ -193,9 +193,9 @@ const CustomerDetail: React.FC = () => {
             {/* Right Section */}
             <div className="flex w-1/4 flex-col gap-y-2 text-white">
               <div className="flex flex-1 flex-col gap-y-2 rounded-xl bg-[#FF7800] px-5 py-6">
-                <h1 className="text-lg font-bold">Visa Detail</h1>
+                <h1 className="text-xl font-bold">Visa Detail</h1>
                 <div className="border-b-2"></div>
-                <div className="flex flex-col gap-y-2">
+                <div className="flex flex-col gap-y-2 text-lg">
                   <div className="flex gap-x-2">
                     <span className="font-medium">Submission</span>
                     <span>: {details.visaDetail?.submission}</span>
@@ -220,9 +220,9 @@ const CustomerDetail: React.FC = () => {
               </div>
 
               <div className="flex flex-1 flex-col gap-y-2 rounded-xl bg-[#FF7800] px-5 py-6">
-                <h1 className="text-lg font-bold">Passport Detail</h1>
+                <h1 className="text-xl font-bold">Passport Detail</h1>
                 <div className="border-b-2"></div>
-                <div className="flex flex-col gap-y-2">
+                <div className="flex flex-col gap-y-2 text-lg">
                   <div className="flex gap-x-2">
                     <span className="font-medium">Passport Number</span>
                     <span>: {details.passportDetail?.number}</span>
@@ -242,7 +242,7 @@ const CustomerDetail: React.FC = () => {
 
           {/* bottom */}
           <div className="flex w-full flex-col gap-y-2 rounded-xl bg-[#FF7800] px-5 py-6 text-white">
-            <h1 className="text-lg font-semibold">Uploaded Documents</h1>
+            <h1 className="text-xl font-semibold">Uploaded Documents</h1>
             <div className="border-b-2"></div>
             <div className="mt-2 grid grid-cols-2 gap-4 md:grid-cols-3">
               {documents.map((doc, index) => (
@@ -252,8 +252,8 @@ const CustomerDetail: React.FC = () => {
                 >
                   <FileText className="h-6 w-6 text-orange-500" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{doc.label}</p>
-                    <p className="text-xs text-gray-500">{doc.name}</p>
+                    <p className="text-base font-medium">{doc.label}</p>
+                    <p className="text-sm text-gray-500">{doc.name}</p>
                   </div>
                   <button
                     disabled={doc.name == "Not Uploaded" ? true : false}

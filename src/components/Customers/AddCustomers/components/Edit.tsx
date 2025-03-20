@@ -131,7 +131,11 @@ const Edit: React.FC<EditProps> = ({
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     setStatus({ load: true, error: false });
     try {
-      onEditCustomer(data);
+      const editData = {
+        ...data,
+        first_name : data.fullname.split(" ")[0],
+      }
+      onEditCustomer(editData);
       reset();
       setStatus({ load: false, error: false });
       setIsOpen(false);
@@ -146,7 +150,7 @@ const Edit: React.FC<EditProps> = ({
   const [returnMinDate, setReturnMinDate] = React.useState("");
   const departDate = watch("depart_date");
   const ref_watch = watch("ref_code");
-  console.log(return_date, "return date");
+  // console.log(return_date, "return date");
 
   React.useEffect(() => {
     const today = new Date();
@@ -173,7 +177,7 @@ const Edit: React.FC<EditProps> = ({
     const day = String(d.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
-  console.log(formatDateToMMDDYYYY(depart_date));
+  // console.log(formatDateToMMDDYYYY(depart_date));
   return (
     <>
       <ModalPop
