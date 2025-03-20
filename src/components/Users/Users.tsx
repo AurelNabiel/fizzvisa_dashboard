@@ -2,7 +2,7 @@
 import React from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { UsersModel } from "./components/data/model";
+import { Agent, UsersModel } from "./components/data/model";
 import {
   Button,
   Listbox,
@@ -54,6 +54,31 @@ const Users: React.FC = () => {
     getData("", page);
   }, [page]);
 
+  const [agent, setAgent] = React.useState<Agent[]>([]);
+  const [loading, setLoading] = React.useState<boolean>(false);
+
+  const getAgent = async () => {
+    setLoading(true);
+    try {
+      await axios
+        .get(`${process.env.NEXT_PUBLIC_DEV_API}/agent`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          setAgent(response.data.data);
+          setLoading(false);
+        });
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    getAgent();
+  }, []);
   return (
     <>
       <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -108,6 +133,7 @@ const Users: React.FC = () => {
                       key={key}
                       getData={getData}
                       users={user}
+                      agent={agent}
                     />
                   ))
                 : [...Array(5)].map((_, key) => <UserLoader key={key} />)}
@@ -214,8 +240,9 @@ export default Users;
 const UsersList: React.FC<{
   users: UsersModel;
   getData: (key: string, page: number) => Promise<void>;
+  agent?: Agent[];
   page: number;
-}> = ({ users, getData, page }) => {
+}> = ({ users, getData, page, agent }) => {
   const [openDelete, setOpenDelete] = React.useState<boolean>(false);
   const [openEdit, setOpenEdit] = React.useState<boolean>(false);
   return (
@@ -235,9 +262,12 @@ const UsersList: React.FC<{
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <div className="flex items-center space-x-3.5">
-            <button onClick={() => {
-              setOpenEdit(true);
-            }} className="hover:text-meta-3">
+            <button
+              onClick={() => {
+                setOpenEdit(true);
+              }}
+              className="hover:text-meta-3"
+            >
               <Edit size="18" variant="Bold" />
             </button>
             <button
@@ -260,9 +290,11 @@ const UsersList: React.FC<{
         currentPage={page}
       />
       <EditUsers
+        agent={agent ?? []}
         user_type={users.user_type}
         currentPage={page}
         getData={getData}
+        agent_id={users.agent?.id ?? 0}
         id={users.id}
         username={users.username}
         role={users.role}
