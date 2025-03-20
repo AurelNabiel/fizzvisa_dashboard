@@ -7,13 +7,21 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Cookies from "js-cookie";
 
-import { useForm, SubmitHandler, useWatch } from "react-hook-form";
+import { useForm, SubmitHandler, useWatch, set } from "react-hook-form";
 import axios from "axios";
 
 interface IFormInput {
   username: string;
-
+  user_type: string;
   role: string;
+  agent_id?: number;
+}
+
+interface Agent {
+  id: number;
+  name: string;
+  email: string;
+  created_by: string;
 }
 
 interface EditProps {
@@ -21,13 +29,18 @@ interface EditProps {
   id: number;
   username: string;
   currentPage: number;
+  user_type: string;
+  agent_id: number;
   role: string;
+  agent: Agent[];
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }
 const schema = yup
   .object({
     username: yup.string().required("Username is required"),
+
+    user_type: yup.string().required("User type is required"),
 
     role: yup.string().required("Role is required"),
   })
@@ -37,10 +50,15 @@ const EditUsers: React.FC<EditProps> = ({
   id,
   username,
   role,
+  user_type,
+  agent,
+  agent_id,
   isOpen,
   currentPage,
   setIsOpen,
 }) => {
+  // console.log(agent_id, "agent_id", agent, "agent");
+
   const token = Cookies.get("token");
   const {
     register,
@@ -52,6 +70,8 @@ const EditUsers: React.FC<EditProps> = ({
     resolver: yupResolver(schema),
   });
   const currentName = useWatch({ control, name: "username" }) || "";
+  const currentRole = useWatch({ control, name: "role" }) || "";
+
   const [status, setStatus] = React.useState({ load: false, error: false });
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     setStatus({ load: true, error: false });
@@ -71,6 +91,7 @@ const EditUsers: React.FC<EditProps> = ({
         });
     } catch (error) {
       console.log(error);
+      setStatus({ load: false, error: true });
     }
   };
 
@@ -132,7 +153,6 @@ const EditUsers: React.FC<EditProps> = ({
               </Typography>
             )}
           </div>
-
           <div>
             <label
               htmlFor="role"
@@ -183,6 +203,109 @@ const EditUsers: React.FC<EditProps> = ({
                   ></path>
                 </svg>
                 {errors.role.message}
+              </Typography>
+            )}
+          </div>
+
+          {currentRole === "agent" || role === "agent" ? (
+            <div>
+              <label
+                htmlFor="role"
+                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Agent
+              </label>
+              <div className="relative">
+                <select
+                  {...register("agent_id", {
+                    required: true,
+                    value: agent_id,
+                  })}
+                  className="ease w-full cursor-pointer appearance-none rounded border border-slate-200 bg-transparent py-2 pl-3 pr-8 text-sm text-slate-700 shadow-sm transition duration-300 placeholder:text-slate-400 hover:border-slate-400 focus:border-slate-400 focus:shadow-md focus:outline-none"
+                >
+                  <option value={0}>Pick an agent</option>
+                  {agent.map((item, key) => (
+                    <option key={key} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.2"
+                  stroke="currentColor"
+                  className="absolute right-2.5 top-2.5 ml-1 h-5 w-5 text-slate-700"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
+                  />
+                </svg>
+              </div>
+              {errors.agent_id && (
+                <Typography
+                  className="mt-5 flex items-center gap-2 text-sm text-red-500"
+                  placeholder={undefined}
+                  onPointerEnterCapture={undefined}
+                  onPointerLeaveCapture={undefined}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-5 w-5"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                  {errors.agent_id.message}
+                </Typography>
+              )}
+            </div>
+          ) : null}
+          <div>
+            <label
+              htmlFor="role"
+              className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              User Type
+            </label>
+            <Input
+              crossOrigin={undefined}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+              {...register("user_type", { required: true, value: role })}
+              type="text"
+              placeholder="admin, agent, user"
+              autoComplete="false"
+              className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            />
+            {errors.user_type && (
+              <Typography
+                className="mt-5 flex items-center gap-2 text-sm text-red-500"
+                placeholder={undefined}
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                {errors.user_type.message}
               </Typography>
             )}
           </div>
