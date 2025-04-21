@@ -9,12 +9,17 @@ import Cookies from "js-cookie";
 
 import { useForm, SubmitHandler, useWatch, set } from "react-hook-form";
 import axios from "axios";
+import { UserAccess } from "./data/model";
 
 interface IFormInput {
   username: string;
   user_type: string;
   role: string;
   agent_id?: number;
+  add: boolean;
+  modify: boolean;
+  delete: boolean;
+  approve: boolean;
 }
 
 interface Agent {
@@ -33,6 +38,7 @@ interface EditProps {
   agent_id: number;
   role: string;
   agent: Agent[];
+  user_access: UserAccess;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }
@@ -43,6 +49,11 @@ const schema = yup
     user_type: yup.string().required("User type is required"),
 
     role: yup.string().required("Role is required"),
+    agent_id: yup.number().optional(),
+    add: yup.boolean().default(false),
+    modify: yup.boolean().default(false),
+    delete: yup.boolean().default(false),
+    approve: yup.boolean().default(false),
   })
   .required();
 const EditUsers: React.FC<EditProps> = ({
@@ -51,14 +62,15 @@ const EditUsers: React.FC<EditProps> = ({
   username,
   role,
   user_type,
+  user_access,
   agent,
   agent_id,
   isOpen,
   currentPage,
   setIsOpen,
 }) => {
-  // console.log(agent_id, "agent_id", agent, "agent");
-
+  console.log(user_access);
+  
   const token = Cookies.get("token");
   const {
     register,
@@ -69,8 +81,8 @@ const EditUsers: React.FC<EditProps> = ({
   } = useForm<IFormInput>({
     resolver: yupResolver(schema),
   });
-  const currentName = useWatch({ control, name: "username" }) || "";
-  const currentRole = useWatch({ control, name: "role" }) || "";
+  // const currentName = useWatch({ control, name: "username" }) || "";
+  const currentUserType = useWatch({ control, name: "user_type" }) || "";
 
   const [status, setStatus] = React.useState({ load: false, error: false });
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
@@ -155,14 +167,14 @@ const EditUsers: React.FC<EditProps> = ({
           </div>
           <div>
             <label
-              htmlFor="role"
+              htmlFor="user_type"
               className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Role
+              User Type
             </label>
             <div className="relative">
               <select
-                {...register("role", { required: true, value: role })}
+                {...register("user_type", { required: true, value: role })}
                 className="ease w-full cursor-pointer appearance-none rounded border border-slate-200 bg-transparent py-2 pl-3 pr-8 text-sm text-slate-700 shadow-sm transition duration-300 placeholder:text-slate-400 hover:border-slate-400 focus:border-slate-400 focus:shadow-md focus:outline-none"
               >
                 <option value="admin">Admin</option>
@@ -183,7 +195,7 @@ const EditUsers: React.FC<EditProps> = ({
                 />
               </svg>
             </div>
-            {errors.role && (
+            {errors.user_type && (
               <Typography
                 className="mt-5 flex items-center gap-2 text-sm text-red-500"
                 placeholder={undefined}
@@ -202,12 +214,12 @@ const EditUsers: React.FC<EditProps> = ({
                     clip-rule="evenodd"
                   ></path>
                 </svg>
-                {errors.role.message}
+                {errors.user_type.message}
               </Typography>
             )}
           </div>
 
-          {currentRole === "agent" || role === "agent" ? (
+          {currentUserType === "agent" || user_type === "agent" ? (
             <div>
               <label
                 htmlFor="role"
@@ -274,19 +286,19 @@ const EditUsers: React.FC<EditProps> = ({
               htmlFor="role"
               className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              User Type
+              Role
             </label>
             <Input
               crossOrigin={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
-              {...register("user_type", { required: true, value: role })}
+              {...register("role", { required: true, value: role })}
               type="text"
               placeholder="admin, agent, user"
               autoComplete="false"
               className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             />
-            {errors.user_type && (
+            {errors.role && (
               <Typography
                 className="mt-5 flex items-center gap-2 text-sm text-red-500"
                 placeholder={undefined}
@@ -305,7 +317,7 @@ const EditUsers: React.FC<EditProps> = ({
                     clip-rule="evenodd"
                   ></path>
                 </svg>
-                {errors.user_type.message}
+                {errors.role.message}
               </Typography>
             )}
           </div>
@@ -331,6 +343,59 @@ const EditUsers: React.FC<EditProps> = ({
               Something went wrong, please try again later
             </Typography>
           )}
+          {/* Checkbox Section */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Permissions
+            </label>
+            <div className="flex space-x-4">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  {...register("add", { value: user_access.add })}
+                  defaultChecked={user_access.add}
+                  className="form-checkbox text-green-600 focus:ring-green-500 dark:focus:ring-green-400"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Add
+                </span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  {...register("modify", { value: user_access.modify })}
+                  defaultChecked={user_access.modify}
+                  className="form-checkbox text-green-600 focus:ring-green-500 dark:focus:ring-green-400"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Modify
+                </span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  {...register("delete", { value: user_access.delete })}
+                  defaultChecked={user_access.delete}
+                  className="form-checkbox text-green-600 focus:ring-green-500 dark:focus:ring-green-400"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Delete
+                </span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  {...register("approve", { value: user_access.approve })}
+                  defaultChecked={user_access.approve}
+                  className="form-checkbox text-green-600 focus:ring-green-500 dark:focus:ring-green-400"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Approve
+                </span>
+              </label>
+            </div>
+          </div>
+
           {/* Buttons Section */}
           <div className="flex justify-end space-x-3">
             {/* Cancel Button */}
@@ -347,10 +412,10 @@ const EditUsers: React.FC<EditProps> = ({
 
             {/* Add Button */}
             <button
-              disabled={status.load || !currentName.trim()}
+              disabled={status.load}
               type="submit"
               className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${
-                status.load || !currentName.trim()
+                status.load
                   ? "cursor-not-allowed bg-gray-400"
                   : "bg-green-600 hover:bg-green-700"
               } focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-green-500 dark:hover:bg-green-600`}
