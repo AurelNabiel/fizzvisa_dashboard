@@ -2,7 +2,7 @@
 import React from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Agent, UsersModel } from "./components/data/model";
+import { Agent, Datum } from "./components/data/model";
 import {
   Button,
   Listbox,
@@ -22,7 +22,7 @@ const Users: React.FC = () => {
   const route = useRouter();
 
   const token = Cookies.get("token");
-  const [users, setUsers] = React.useState<UsersModel[]>([]);
+  const [users, setUsers] = React.useState<Datum[]>([]);
   const [status, setStatus] = React.useState({ load: false, error: false });
   const [page, setPage] = React.useState(1);
   const [totalPages, setTotalPages] = React.useState(1);
@@ -116,6 +116,9 @@ const Users: React.FC = () => {
                 </th>
                 <th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white">
                   Email
+                </th>
+                <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
+                  User Type
                 </th>
                 <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
                   Role
@@ -238,7 +241,7 @@ const Users: React.FC = () => {
 export default Users;
 
 const UsersList: React.FC<{
-  users: UsersModel;
+  users: Datum;
   getData: (key: string, page: number) => Promise<void>;
   agent?: Agent[];
   page: number;
@@ -256,6 +259,9 @@ const UsersList: React.FC<{
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="text-black dark:text-white">{users.email}</p>
+        </td>
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <p className="text-black dark:text-white">{users.user_type}</p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="text-black dark:text-white">{users.role}</p>
@@ -294,6 +300,7 @@ const UsersList: React.FC<{
         user_type={users.user_type}
         currentPage={page}
         getData={getData}
+        user_access={users.user_access}
         agent_id={users.agent?.id ?? 0}
         id={users.id}
         username={users.username}

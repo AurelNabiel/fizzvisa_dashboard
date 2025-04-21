@@ -371,7 +371,7 @@ const Login: React.FC = () => {
                   disabled={submitStatus.load}
                   className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
                 >
-                  {submitStatus.load ? "Loading..." : "LOgin"}
+                  {submitStatus.load ? "Loading..." : "Login"}
                 </Button>
               </div>
 
