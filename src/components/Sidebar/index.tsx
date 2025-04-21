@@ -215,22 +215,24 @@ const menuGroups = [
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
-  const [role, setRole] = useState<string>("");
+  const [userType, setType] = useState<string>("");
 
   useEffect(() => {
     const userFromCookie = Cookies.get("user");
     const user = userFromCookie ? JSON.parse(userFromCookie) : null;
     // console.log(user);
     if (user) {
-      setRole(user.role);
+      setType(user.user_type);
+      console.log(user);
+      
     }
   }, []);
 
   const filteredMenuGroups = menuGroups.map((group) => ({
     ...group,
     menuItems: group.menuItems.filter((item) => {
-      if (role === "admin") return true; // Admin sees all menu items
-      if (role === "agent" && (item.label === "Dashboard" || item.label === "Customers List")) return true; // Agent sees Dashboard and Assign Agent
+      if (userType === "admin") return true; // Admin sees all menu items
+      if (userType === "agent" && (item.label === "Dashboard" || item.label === "Customers List")) return true; // Agent sees Dashboard and Assign Agent
       return false; // Exclude other items
     }),
   }));
