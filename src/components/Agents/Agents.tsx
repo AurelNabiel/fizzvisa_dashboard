@@ -20,6 +20,23 @@ const Agents: React.FC = () => {
   const [agents, setAgents] = React.useState<Agent[]>([]);
   const [status, setStatus] = React.useState({ load: false, error: false });
   const token = Cookies.get("token");
+  const [access, setAccess] = React.useState({
+    id: 0,
+    add: false,
+    modify: false,
+    delete: false,
+    approve: false,
+    reference_id: 0,
+    created_at: new Date(),
+    updated_at: new Date(),
+  });
+  React.useEffect(() => {
+    const userCookie = Cookies.get("user");
+    if (userCookie) {
+      const user = JSON.parse(userCookie);
+      setAccess(user.user_access);
+    }
+  }, []);
   const getData = async (key: string) => {
     setStatus({ load: true, error: false });
     try {
@@ -69,7 +86,7 @@ const Agents: React.FC = () => {
                 }
               }}
             />
-            <Add getData={getData} />
+            {access.add && <Add getData={getData} />}
           </div>
         </div>
         <div className="max-w-full overflow-x-auto">
@@ -95,7 +112,12 @@ const Agents: React.FC = () => {
             </thead>
             <tbody>
               {agents.map((data, key) => (
-                <AgentItem key={key} agent={data} getData={getData} />
+                <AgentItem
+                  access={access}
+                  key={key}
+                  agent={data}
+                  getData={getData}
+                />
               ))}
             </tbody>
           </table>
@@ -124,8 +146,18 @@ const Agents: React.FC = () => {
 
 const AgentItem: React.FC<{
   agent: Agent;
+  access: {
+    id: number;
+    add: boolean;
+    modify: boolean;
+    delete: boolean;
+    approve: boolean;
+    reference_id: number;
+    created_at: Date;
+    updated_at: Date;
+  };
   getData: (key: string) => Promise<void>;
-}> = ({ agent, getData }) => {
+}> = ({ agent, getData, access }) => {
   const [editOpen, setEditOpen] = React.useState<boolean>(false);
   const [deleteOpen, setDeleteOpen] = React.useState<boolean>(false);
   return (
@@ -145,20 +177,24 @@ const AgentItem: React.FC<{
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <div className="flex items-center space-x-3.5">
-            <button className="hover:text-meta-3">
-              <Edit
-                onClick={() => setEditOpen(true)}
-                size="18"
-                variant="Bold"
-              />
-            </button>
-            <button className="hover:text-danger">
-              <Trash
-                onClick={() => setDeleteOpen(true)}
-                size="18"
-                variant="Bold"
-              />
-            </button>
+            {access.modify && (
+              <button className="hover:text-meta-3">
+                <Edit
+                  onClick={() => setEditOpen(true)}
+                  size="18"
+                  variant="Bold"
+                />
+              </button>
+            )}
+            {access.delete && (
+              <button className="hover:text-danger">
+                <Trash
+                  onClick={() => setDeleteOpen(true)}
+                  size="18"
+                  variant="Bold"
+                />
+              </button>
+            )}
           </div>
         </td>
       </tr>
