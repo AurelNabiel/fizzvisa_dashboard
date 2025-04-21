@@ -31,6 +31,7 @@ import {
   MenuList,
 } from "@material-tailwind/react";
 import DeleteCust from "./components/Delete";
+import { UserAccess } from "../Users/components/data/model";
 const Customers: React.FC = () => {
   const route = useRouter();
   const [customers, setCustomers] = React.useState<Customers[]>([]);
@@ -38,14 +39,24 @@ const Customers: React.FC = () => {
   const [page, setPage] = React.useState(1);
   const [totalPages, setTotalPages] = React.useState(1);
   const token = Cookies.get("token");
-  const [role, setRole] = React.useState<string>("");
+  const [access, setAccess] = React.useState<UserAccess>({
+    id: 0,
+    add: false,
+    modify: false,
+    delete: false,
+    approve: false,
+    reference_id: 0,
+    created_at: new Date(),
+    updated_at: new Date(),
+  });
 
   React.useEffect(() => {
     const userFromCookie = Cookies.get("user");
     const user = userFromCookie ? JSON.parse(userFromCookie) : null;
     // console.log(user);
     if (user) {
-      setRole(user.role);
+      setAccess(user.user_access);
+      console.log(user.user_access);
     }
   }, []);
 
@@ -215,7 +226,7 @@ const Customers: React.FC = () => {
                 }
               }}
             />
-            {role === "admin" && (
+            {access.add && (
               <Button
                 onClick={() => route.push("/customers/add")}
                 className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
@@ -343,7 +354,7 @@ const Customers: React.FC = () => {
                       getCustomers={getCustomers}
                       currentPage={page}
                       setSelected={setSelectedAgents}
-                      role={role}
+                      userAccess={access}
                     />
                   ))
                 : [...Array(5)].map((_, key) => <CustomerLoader key={key} />)}
@@ -462,7 +473,7 @@ const CustomerList: React.FC<{
   setSelectedCustomers: (value: any[]) => void;
   handleCheckboxChange: (customer: any) => void;
   setSelected: (value: Agent | null) => void;
-  role: string;
+  userAccess?: UserAccess;
 }> = ({
   customers,
   getCustomers,
@@ -471,7 +482,7 @@ const CustomerList: React.FC<{
   setSelectedCustomers,
   handleCheckboxChange,
   setSelected,
-  role,
+  userAccess,
 }) => {
   const [assignOpen, setAssingOpen] = React.useState<boolean>(false);
   const [deleteOpen, setDeleteOpen] = React.useState<boolean>(false);
@@ -566,7 +577,7 @@ const CustomerList: React.FC<{
                 Detail
               </MenuItem>
 
-              {role === "admin" && (
+              {userAccess?.delete && (
                 <MenuItem
                   onClick={() => setDeleteOpen(true)}
                   className="flex items-center text-sm text-red-600 hover:bg-red-100"
