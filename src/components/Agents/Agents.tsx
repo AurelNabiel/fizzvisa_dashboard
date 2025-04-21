@@ -20,6 +20,7 @@ const Agents: React.FC = () => {
   const [agents, setAgents] = React.useState<Agent[]>([]);
   const [status, setStatus] = React.useState({ load: false, error: false });
   const token = Cookies.get("token");
+
   const [access, setAccess] = React.useState({
     id: 0,
     add: false,
@@ -37,6 +38,7 @@ const Agents: React.FC = () => {
       setAccess(user.user_access);
     }
   }, []);
+
   const getData = async (key: string) => {
     setStatus({ load: true, error: false });
     try {

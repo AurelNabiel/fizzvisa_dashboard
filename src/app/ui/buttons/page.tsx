@@ -5,7 +5,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 export const metadata: Metadata = {
   title:
-    "Fizzvisa",
+    "FazzVisa",
   description: "We provide a simple, fast, and easy online travel Visa conclerge",
 };
 
