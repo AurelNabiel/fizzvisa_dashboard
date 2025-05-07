@@ -124,7 +124,7 @@ const CustomerAdd: React.FC = () => {
             Add Customers
           </h2>
           <div className="flex gap-x-3">
-            <Import onAddCustomer={handleAddCustomer} />
+            <Import onAddCustomer={handleAddCustomer} setStatus={setStatus} />
             <Add onAddCustomer={handleAddCustomer} />
           </div>
         </div>
