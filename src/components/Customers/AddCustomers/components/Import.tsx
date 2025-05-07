@@ -74,11 +74,18 @@ const schema = yup.object({
   }),
 });
 
-interface ImportProps {
-  onAddCustomer: (customer: any) => void;
+interface ImportStatus {
+  load: boolean;
+  error: boolean;
+  message: string;
 }
 
-const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
+interface ImportProps {
+  onAddCustomer: (customer: any) => void;
+  setStatus: (status: ImportStatus) => void;
+}
+
+const Import: React.FC<ImportProps> = ({ onAddCustomer, setStatus }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorDocument, setErrorDocument] = useState<string | null>(null);
@@ -87,6 +94,7 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
   const [disable, setDisable] = useState<boolean>(true);
   const [isXlsx, setIsXlsx] = useState<boolean>(false); // Track if it's XLSX file
   const token = Cookies.get("token");
+  const [submitStatus, setSubmitStatus] = useState<string | null>(null);
   // Helper to check if headers are valid
   const areHeadersValid = (
     fileHeaders: string[],
@@ -121,7 +129,7 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
 
         if (!areHeadersValid(headers, expectedHeaders)) {
           console.log("Invalid headers", headers, data);
-          
+
           setErrorDocument(
             `Invalid CSV headers. Expected headers: ${expectedHeaders.join(", ")}`,
           );
@@ -225,6 +233,8 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
   const getDocument = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setDocs(null); // Reset docs
+      setErrorDocument(null);
+
       const file = e.target.files[0];
       const allowedFileTypes = [
         "text/csv",
@@ -294,13 +304,68 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
         }
       } else {
         // Process the CSV data and submit to the API
-        documentData.forEach((entry) => {
-          const submitData = {
+        // documentData.forEach(async (entry) => {
+        //   const submitData = {
+        //     ...entry,
+        //     first_name: entry.fullname.split(" ")[0],
+        //   };
+        //   console.log(submitData);
+
+        //   // await axios.post(
+        //   //   `${process.env.NEXT_PUBLIC_DEV_API}/customer/create`,
+        //   //   submitData,
+        //   //   {
+        //   //     headers: {
+        //   //       "Content-Type": "application/json",
+        //   //       Authorization: `Bearer ${token}`,
+        //   //     },
+        //   //   },
+        //   // ).then((res) => {
+        //   //   console.log(res.data);
+        //   //   // onAddCustomer(res.data); // Call the onAddCustomer function with the response data
+        //   // })
+
+        //   onAddCustomer(submitData);
+        // });
+        const customersPayload = documentData.map((entry) => {
+          const formatted = {
             ...entry,
             first_name: entry.fullname.split(" ")[0],
+            depart_date: new Date(entry.depart_date)
+              .toISOString()
+              .split("T")[0],
+            return_date: new Date(entry.return_date)
+              .toISOString()
+              .split("T")[0],
+            ref_code_created_date: entry.ref_code_created_date
+              ? new Date(entry.ref_code_created_date)
+                  .toISOString()
+                  .split("T")[0]
+              : null,
           };
-          onAddCustomer(submitData);
+          return formatted;
         });
+
+        console.log({ customers: customersPayload });
+
+        await axios
+          .post(
+            `${process.env.NEXT_PUBLIC_DEV_API}/customer/create`,
+            { customers: customersPayload },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          )
+          .then((res) => {
+            console.log(res.data);
+            setStatus({ load: false, error: false, message: "Customers saved successfully." });
+            setTimeout(() => {
+              setStatus({ load: false, error: false, message: "" });
+            }, 3000);
+          });
         setIsLoading(false);
         setErrorDocument(null);
         setDocumentData([]);
@@ -310,7 +375,13 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer }) => {
       }
     } catch (error) {
       setIsLoading(false);
-      setErrorDocument("An error occurred while submitting the data.");
+      if (axios.isAxiosError(error) && error.response) {
+        console.log(error.response.data.message);
+        setErrorDocument(error.response.data.message);
+      } else {
+        console.error("An unexpected error occurred:", error);
+        setErrorDocument("An error occurred while submitting the data.");
+      }
     }
   };
 
