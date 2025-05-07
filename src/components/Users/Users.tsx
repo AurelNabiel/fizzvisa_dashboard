@@ -2,7 +2,7 @@
 import React from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Agent, Datum } from "./components/data/model";
+import { Agent, Datum, UserAccess } from "./components/data/model";
 import {
   Button,
   Listbox,
@@ -26,6 +26,30 @@ const Users: React.FC = () => {
   const [status, setStatus] = React.useState({ load: false, error: false });
   const [page, setPage] = React.useState(1);
   const [totalPages, setTotalPages] = React.useState(1);
+  const [access, setAccess] = React.useState<UserAccess>({
+    id: 0,
+    add: false,
+    modify: false,
+    delete: false,
+    approve: false,
+    reference_id: 0,
+    created_at: new Date(),
+    updated_at: new Date(),
+  });
+
+  const [email , setEmail] = React.useState<string>("");
+
+  React.useEffect(() => {
+    const userCookie = Cookies.get("user");
+    if (userCookie) {
+      const user = JSON.parse(userCookie);
+      setEmail(user.email);
+      setAccess(user.user_access);
+    } else {
+      route.push("/auth/signin");
+    }
+  }, []);
+
   const getData = async (key: string, page: number) => {
     setStatus({ load: true, error: false });
     try {
@@ -101,7 +125,7 @@ const Users: React.FC = () => {
                 }
               }}
             />
-            <Add getData={getData} />
+            {access.add && <Add getData={getData} />}
           </div>
         </div>
         <div className="max-w-full overflow-x-auto">
@@ -130,15 +154,18 @@ const Users: React.FC = () => {
             </thead>
             <tbody>
               {!status.load
-                ? users.map((user, key) => (
-                    <UsersList
-                      page={page}
-                      key={key}
-                      getData={getData}
-                      users={user}
-                      agent={agent}
-                    />
-                  ))
+                ? users
+                    .filter((user) => user.email !== email)
+                    .map((user: Datum, key: React.Key | null | undefined) => (
+                      <UsersList
+                        page={page}
+                        key={key}
+                        getData={getData}
+                        users={user}
+                        agent={agent}
+                        access={access}
+                      />
+                    ))
                 : [...Array(5)].map((_, key) => <UserLoader key={key} />)}
             </tbody>
           </table>
@@ -245,7 +272,8 @@ const UsersList: React.FC<{
   getData: (key: string, page: number) => Promise<void>;
   agent?: Agent[];
   page: number;
-}> = ({ users, getData, page, agent }) => {
+  access: UserAccess;
+}> = ({ users, getData, page, agent, access }) => {
   const [openDelete, setOpenDelete] = React.useState<boolean>(false);
   const [openEdit, setOpenEdit] = React.useState<boolean>(false);
   return (
@@ -268,22 +296,26 @@ const UsersList: React.FC<{
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <div className="flex items-center space-x-3.5">
-            <button
-              onClick={() => {
-                setOpenEdit(true);
-              }}
-              className="hover:text-meta-3"
-            >
-              <Edit size="18" variant="Bold" />
-            </button>
-            <button
-              onClick={() => {
-                setOpenDelete(true);
-              }}
-              className="hover:text-danger"
-            >
-              <Trash size="18" variant="Bold" />
-            </button>
+            {access.modify && (
+              <button
+                onClick={() => {
+                  setOpenEdit(true);
+                }}
+                className="hover:text-meta-3"
+              >
+                <Edit size="18" variant="Bold" />
+              </button>
+            )}
+            {access.delete && (
+              <button
+                onClick={() => {
+                  setOpenDelete(true);
+                }}
+                className="hover:text-danger"
+              >
+                <Trash size="18" variant="Bold" />
+              </button>
+            )}
           </div>
         </td>
       </tr>
