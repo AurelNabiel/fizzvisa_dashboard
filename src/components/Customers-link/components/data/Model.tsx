@@ -28,6 +28,7 @@ export interface Customers {
   document: Document | null;
   send_date: Date | null;
   send_status: null | string;
+  is_paid: boolean;
   agent: Agent | null;
 }
 

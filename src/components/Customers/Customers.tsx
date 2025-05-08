@@ -15,22 +15,13 @@ import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
 import { useRouter } from "next/navigation";
 import { decryptData } from "./components/Decryption";
-import {
-  ArrowDown2,
-  Check,
-  Edit,
-  HambergerMenu,
-  More,
-  Task,
-  Trash,
-} from "iconsax-react";
+import { Edit, HambergerMenu, More } from "iconsax-react";
 import {
   Menu,
   MenuHandler,
   MenuItem,
   MenuList,
 } from "@material-tailwind/react";
-import DeleteCust from "./components/Delete";
 const Customers: React.FC = () => {
   const route = useRouter();
   const [customers, setCustomers] = React.useState<Customers[]>([]);
@@ -49,17 +40,13 @@ const Customers: React.FC = () => {
     }
   }, []);
 
-  const getCustomers = async (
-    key: string,
-    page: number,
-    agent_id: number,
-  ): Promise<void> => {
+  const getCustomers = async (key: string, page: number): Promise<void> => {
     setStatus({ load: true, error: false });
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_DEV_API}/customer?page=${page}&limit=10${
           key !== "" ? `&keyword=${key}` : ""
-        }${agent_id != 0 ? `&agent_ids=${agent_id}` : ""}`,
+        }&is_send_link=true`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -100,104 +87,20 @@ const Customers: React.FC = () => {
     error: false,
     message: "",
   });
-  const handleSubmitSelected = async () => {
-    setSubmitStatus({ load: true, error: false, message: "" });
-    try {
-      const submit = {
-        data: selectedCustomers.map((customer) => {
-          return {
-            ref_code: decryptData(customer.ref_code),
-            email: customer.email,
-            fullname: customer.fullname,
-          };
-        }),
-      };
-      console.log(submit);
-
-      await axios
-        .post(`${process.env.NEXT_PUBLIC_DEV_API}/customer/send-link`, submit, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          console.log(res);
-          setSubmitStatus({
-            load: false,
-            error: false,
-            message: "Link sent successfully",
-          });
-          setSelectedCustomers([]);
-          getCustomers("", page, selectedAgents?.id ?? 0);
-          setTimeout(() => {
-            setSubmitStatus({ load: false, error: false, message: "" });
-          }, 3000);
-        });
-    } catch (error) {
-      console.log(error);
-      setSubmitStatus({
-        load: false,
-        error: true,
-        message: "Something went wrong",
-      });
-      setTimeout(() => {
-        setSubmitStatus({ load: false, error: false, message: "" });
-      }, 3000);
-    }
-  };
-
-  // filter agent
-  const [agents, setAgents] = React.useState<Agent[]>([]);
-  const [agentStatus, setAgentStatus] = React.useState({
-    load: false,
-    error: false,
-  });
-  const [selectedAgents, setSelectedAgents] = React.useState<Agent | null>(
-    null,
-  );
-  const getAgents = async (): Promise<void> => {
-    setAgentStatus({ load: true, error: false });
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_DEV_API}/agent`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      setAgents(response.data.data);
-      setAgentStatus({ load: false, error: false });
-    } catch (error) {
-      console.error(error);
-      setAgentStatus({ load: false, error: true });
-    }
-  };
 
   React.useEffect(() => {
-    getAgents();
-  }, []);
-
-  React.useEffect(() => {
-    getCustomers("", page, selectedAgents?.id ?? 0);
-  }, [page, selectedAgents]);
-
-  React.useEffect(() => {
-    console.log(selectedAgents);
-  }, [selectedAgents]);
-
-  const handleFilter = (e: any) => {
-    console.log(e);
-    setSelectedAgents(e);
-    setPage(1);
-  };
+    getCustomers("", page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
   // filter link sudah di send
   return (
     <>
       <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         <div className="flex items-center justify-between pb-4">
-          <h2 className="dark: text-lg font-semibold text-black">Customers</h2>
+          <h2 className="dark: text-lg font-semibold text-black">
+            Customers List
+          </h2>
           <div className="flex gap-x-3">
             <input
               type="text"
@@ -205,17 +108,15 @@ const Customers: React.FC = () => {
               className="dark: rounded-md border bg-white px-4 py-2 text-sm text-black dark:border-strokedark dark:bg-boxdark"
               onChange={(e) => {
                 if (e.target.value.length > 2) {
-                  getCustomers(e.target.value, 1, selectedAgents?.id ?? 0);
+                  getCustomers(e.target.value, 1);
                   setPage(1); // Reset to first page on new search
-                  setSelectedAgents(null);
                 } else {
-                  getCustomers("", 1, selectedAgents?.id ?? 0);
+                  getCustomers("", 1);
                   setPage(1);
-                  setSelectedAgents(null);
                 }
               }}
             />
-            {role === "admin" && (
+            {/* {role === "admin" && (
               <Button
                 onClick={() => route.push("/customers/add")}
                 className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
@@ -280,7 +181,7 @@ const Customers: React.FC = () => {
                   ))}
                 </ListboxOptions>
               </div>
-            </Listbox>
+            </Listbox> */}
           </div>
         </div>
 
@@ -299,14 +200,14 @@ const Customers: React.FC = () => {
           <table className="w-full table-auto">
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                <th className="dark: min-w-[40px] px-4 py-4 pl-9 font-medium text-black xl:pl-11">
+                {/* <th className="dark: min-w-[40px] px-4 py-4 pl-9 font-medium text-black xl:pl-11">
                   <input
                     type="checkbox"
                     className="rounded-md border-gray-300 text-primary focus:border-primary"
                     checked={selectAll}
                     onChange={handleSelectAll}
                   />
-                </th>
+                </th> */}
                 <th className="dark: min-w-[220px] px-4 py-4 font-medium text-black xl:pl-11">
                   Referal Code
                 </th>
@@ -321,10 +222,10 @@ const Customers: React.FC = () => {
                 </th>
                 <th className="dark: px-4 py-4 font-medium text-black">Date</th>
                 <th className="dark: px-4 py-4 font-medium text-black">
-                  Send Status
+                  Payment Status
                 </th>
                 <th className="dark: px-4 py-4 font-medium text-black">
-                  Agent Name
+                  Payment Date
                 </th>
                 <th className="dark: px-4 py-4 font-medium text-black">
                   Actions
@@ -335,14 +236,11 @@ const Customers: React.FC = () => {
               {!status.load
                 ? customers.map((data, key) => (
                     <CustomerList
-                      selectedCustomers={selectedCustomers}
-                      setSelectedCustomers={setSelectedCustomers}
-                      handleCheckboxChange={handleCheckboxChange}
                       key={key}
                       customers={data}
+                      setCustomers={setCustomers}
                       getCustomers={getCustomers}
                       currentPage={page}
-                      setSelected={setSelectedAgents}
                       role={role}
                     />
                   ))
@@ -441,13 +339,6 @@ const Customers: React.FC = () => {
               Next
             </button>
           </nav>
-          <button
-            onClick={handleSubmitSelected}
-            className={` rounded-lg border px-4 py-2 text-white  hover:bg-opacity-90 ${selectedCustomers.length === 0 || submitStatus.load ? "cursor-not-allowed bg-gray-300" : "bg-primary"}`}
-            disabled={selectedCustomers.length === 0 || submitStatus.load}
-          >
-            {submitStatus.load ? "Sending..." : "Send Link"}
-          </button>
         </div>
       </div>
     </>
@@ -457,41 +348,51 @@ const Customers: React.FC = () => {
 const CustomerList: React.FC<{
   currentPage?: number;
   customers: Customers;
-  getCustomers: (key: string, page: number, agent_id: number) => Promise<void>;
-  selectedCustomers: any[];
-  setSelectedCustomers: (value: any[]) => void;
-  handleCheckboxChange: (customer: any) => void;
-  setSelected: (value: Agent | null) => void;
+  getCustomers: (key: string, page: number) => Promise<void>;
+  setCustomers: React.Dispatch<React.SetStateAction<Customers[]>>;
+
   role: string;
-}> = ({
-  customers,
-  getCustomers,
-  currentPage,
-  selectedCustomers,
-  setSelectedCustomers,
-  handleCheckboxChange,
-  setSelected,
-  role,
-}) => {
-  const [assignOpen, setAssingOpen] = React.useState<boolean>(false);
-  const [deleteOpen, setDeleteOpen] = React.useState<boolean>(false);
+}> = ({ customers, getCustomers, currentPage, setCustomers, role }) => {
+  const [editOpen, setEditOpen] = React.useState<boolean>(false);
   const decryptedRefCode = decryptData(customers.ref_code);
   // console.log(decryptedRefCode, "HAI", customers.fullname);
   const route = useRouter();
 
+  const togglePaidStatus = async () => {
+    try {
+      const updatedPaidStatus = !customers.is_paid;
+
+      await axios
+        .put(
+          `${process.env.NEXT_PUBLIC_DEV_API}/customer/${customers.ref_code}`,
+          {
+            is_paid: !customers.is_paid,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
+          },
+        )
+        .then((response) => {
+          console.log(response.data, "Success");
+          setCustomers((prev) =>
+            prev.map((cust) =>
+              cust.ref_code === customers.ref_code
+                ? { ...cust, is_paid: updatedPaidStatus }
+                : cust,
+            ),
+          );
+
+          setEditOpen(false);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <tr>
-        <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
-          <input
-            type="checkbox"
-            className="rounded-md border-gray-300 text-primary focus:border-primary"
-            checked={selectedCustomers.includes(customers)}
-            onChange={() => {
-              handleCheckboxChange(customers);
-            }}
-          />
-        </td>
         <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
           <h5 className="dark: font-medium text-black">{decryptedRefCode}</h5>
         </td>
@@ -522,13 +423,14 @@ const CustomerList: React.FC<{
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p
-            className={`rounded-full px-3  py-1 text-center text-white  dark:text-white ${customers.send_status == null ? "bg-gray-400" : customers.send_status == "success" ? "bg-green-500" : "bg-red-500"}`}
+            className={`rounded-full px-3  py-1 text-center text-white  dark:text-white ${customers.is_paid ? "bg-green-500" : "bg-red-500"}`}
           >
-            {customers.send_status == null
+            {/* {customers.send_status == null
               ? "Not Sent"
               : customers.send_status == "success"
                 ? "Sent"
-                : "Failed"}
+                : "Failed"} */}
+            {customers.is_paid ? "Paid" : "Unpaid"}
           </p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
@@ -568,29 +470,20 @@ const CustomerList: React.FC<{
 
               {role === "admin" && (
                 <MenuItem
-                  onClick={() => setDeleteOpen(true)}
-                  className="flex items-center text-sm text-red-600 hover:bg-red-100"
+                  onClick={() => togglePaidStatus()}
+                  className="flex items-center text-sm text-blue-600 hover:bg-blue-100"
                   placeholder={undefined}
                   onPointerEnterCapture={undefined}
                   onPointerLeaveCapture={undefined}
                 >
-                  <Trash size="18" variant="Bold" className="mr-2" />
-                  Delete
+                  <Edit size="18" variant="Bold" className="mr-2" />
+                  {customers.is_paid ? "Mark as Unpaid" : "Mark as Paid"}
                 </MenuItem>
               )}
             </MenuList>
           </Menu>
         </td>
       </tr>
-      <DeleteCust
-        currentPage={currentPage ?? 1}
-        id={customers.id}
-        fullname={customers.fullname ?? customers.first_name ?? "Unknown"}
-        getCustomers={getCustomers}
-        deleteOpen={deleteOpen}
-        setDeleteOpen={setDeleteOpen}
-        setSelected={setSelected}
-      />
     </>
   );
 };

@@ -1,36 +1,13 @@
 "use client";
 import React from "react";
-import type { Agent, Customers } from "./components/data/Model";
+import type {  Customers } from "./components/data/Model";
 import axios from "axios";
 import Cookies from "js-cookie";
-import {
-  Button,
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions,
-} from "@headlessui/react";
-import clsx from "clsx";
 import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
 import { useRouter } from "next/navigation";
 import { decryptData } from "./components/Decryption";
-import {
-  ArrowDown2,
-  Check,
-  Edit,
-  HambergerMenu,
-  More,
-  Task,
-  Trash,
-} from "iconsax-react";
-import {
-  Menu,
-  MenuHandler,
-  MenuItem,
-  MenuList,
-} from "@material-tailwind/react";
-import DeleteCust from "./components/Delete";
+
 const CustomersLink: React.FC = () => {
   const route = useRouter();
   const [customers, setCustomers] = React.useState<Customers[]>([]);
@@ -49,17 +26,15 @@ const CustomersLink: React.FC = () => {
     }
   }, []);
 
-  const getCustomers = async (
-    key: string,
-    page: number,
-    agent_id: number,
-  ): Promise<void> => {
+  const getCustomers = async (key: string, page: number): Promise<void> => {
+    console.log(key);
+    
     setStatus({ load: true, error: false });
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_DEV_API}/customer?page=${page}&limit=10${
           key !== "" ? `&keyword=${key}` : ""
-        }${agent_id != 0 ? `&agent_ids=${agent_id}` : ""}&is_send_link=false`,
+        }&is_send_link=false`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -75,6 +50,9 @@ const CustomersLink: React.FC = () => {
     }
   };
 
+  React.useEffect(() => {
+    getCustomers("", page);
+  }, [page]);
   // select
   const [selectedCustomers, setSelectedCustomers] = React.useState<any[]>([]);
   const selectAll =
@@ -128,7 +106,7 @@ const CustomersLink: React.FC = () => {
             message: "Link sent successfully",
           });
           setSelectedCustomers([]);
-          getCustomers("", page, selectedAgents?.id ?? 0);
+          getCustomers("", page);
           setTimeout(() => {
             setSubmitStatus({ load: false, error: false, message: "" });
           }, 3000);
@@ -147,57 +125,15 @@ const CustomersLink: React.FC = () => {
   };
 
   // filter agent
-  const [agents, setAgents] = React.useState<Agent[]>([]);
-  const [agentStatus, setAgentStatus] = React.useState({
-    load: false,
-    error: false,
-  });
-  const [selectedAgents, setSelectedAgents] = React.useState<Agent | null>(
-    null,
-  );
-  const getAgents = async (): Promise<void> => {
-    setAgentStatus({ load: true, error: false });
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_DEV_API}/agent`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      setAgents(response.data.data);
-      setAgentStatus({ load: false, error: false });
-    } catch (error) {
-      console.error(error);
-      setAgentStatus({ load: false, error: true });
-    }
-  };
-
-  React.useEffect(() => {
-    getAgents();
-  }, []);
-
-  React.useEffect(() => {
-    getCustomers("", page, selectedAgents?.id ?? 0);
-  }, [page, selectedAgents]);
-
-  React.useEffect(() => {
-    console.log(selectedAgents);
-  }, [selectedAgents]);
-
-  const handleFilter = (e: any) => {
-    console.log(e);
-    setSelectedAgents(e);
-    setPage(1);
-  };
 
   // filter link sudah di send
   return (
     <>
       <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         <div className="flex items-center justify-between pb-4">
-          <h2 className="dark: text-lg font-semibold text-black">Customers Link</h2>
+          <h2 className="dark: text-lg font-semibold text-black">
+            Customers Link
+          </h2>
           <div className="flex gap-x-3">
             <input
               type="text"
@@ -205,17 +141,14 @@ const CustomersLink: React.FC = () => {
               className="dark: rounded-md border bg-white px-4 py-2 text-sm text-black dark:border-strokedark dark:bg-boxdark"
               onChange={(e) => {
                 if (e.target.value.length > 2) {
-                  getCustomers(e.target.value, 1, selectedAgents?.id ?? 0);
-                  setPage(1); // Reset to first page on new search
-                  setSelectedAgents(null);
+                  getCustomers(e.target.value, 1);
+                  setPage(1); 
                 } else {
-                  getCustomers("", 1, selectedAgents?.id ?? 0);
+                  getCustomers("", 1);
                   setPage(1);
-                  setSelectedAgents(null);
                 }
               }}
             />
-           
           </div>
         </div>
 
@@ -258,7 +191,6 @@ const CustomersLink: React.FC = () => {
                 <th className="dark: px-4 py-4 font-medium text-black">
                   Send Status
                 </th>
-               
               </tr>
             </thead>
             <tbody>
@@ -272,7 +204,7 @@ const CustomersLink: React.FC = () => {
                       customers={data}
                       getCustomers={getCustomers}
                       currentPage={page}
-                      setSelected={setSelectedAgents}
+
                       role={role}
                     />
                   ))
@@ -391,7 +323,7 @@ const CustomerList: React.FC<{
   selectedCustomers: any[];
   setSelectedCustomers: (value: any[]) => void;
   handleCheckboxChange: (customer: any) => void;
-  setSelected: (value: Agent | null) => void;
+
   role: string;
 }> = ({
   customers,
@@ -400,7 +332,7 @@ const CustomerList: React.FC<{
   selectedCustomers,
   setSelectedCustomers,
   handleCheckboxChange,
-  setSelected,
+
   role,
 }) => {
   const [assignOpen, setAssingOpen] = React.useState<boolean>(false);
@@ -462,15 +394,7 @@ const CustomerList: React.FC<{
           </p>
         </td>
       </tr>
-      <DeleteCust
-        currentPage={currentPage ?? 1}
-        id={customers.id}
-        fullname={customers.fullname ?? customers.first_name ?? "Unknown"}
-        getCustomers={getCustomers}
-        deleteOpen={deleteOpen}
-        setDeleteOpen={setDeleteOpen}
-        setSelected={setSelected}
-      />
+     
     </>
   );
 };
