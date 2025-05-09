@@ -361,10 +361,13 @@ const CustomerList: React.FC<{
   const togglePaidStatus = async () => {
     try {
       const updatedPaidStatus = !customers.is_paid;
+      const updatedPaymentDate = updatedPaidStatus
+        ? new Date().toISOString()
+        : null;
 
       await axios
         .put(
-          `${process.env.NEXT_PUBLIC_DEV_API}/customer/${customers.ref_code}`,
+          `${process.env.NEXT_PUBLIC_DEV_API}/customer/edit/${customers.ref_code}`,
           {
             is_paid: !customers.is_paid,
           },
@@ -379,7 +382,11 @@ const CustomerList: React.FC<{
           setCustomers((prev) =>
             prev.map((cust) =>
               cust.ref_code === customers.ref_code
-                ? { ...cust, is_paid: updatedPaidStatus }
+                ? {
+                    ...cust,
+                    is_paid: updatedPaidStatus,
+                    payment_date: updatedPaymentDate ? new Date(updatedPaymentDate) : null,
+                  }
                 : cust,
             ),
           );
@@ -435,7 +442,13 @@ const CustomerList: React.FC<{
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="dark: text-black">
-            {customers.agent?.name ?? "Unknown"}
+            {customers.payment_date
+              ? new Date(customers.payment_date).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              : "Date not available"}
           </p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
@@ -471,13 +484,14 @@ const CustomerList: React.FC<{
               {role === "admin" && (
                 <MenuItem
                   onClick={() => togglePaidStatus()}
-                  className="flex items-center text-sm text-blue-600 hover:bg-blue-100"
+                  disabled={customers.is_paid}
+                  className={`flex items-center text-sm  hover:bg-blue-100 ${customers.is_paid ? "text-red-500 cursor-not-allowed" : "text-green-500"}`}
                   placeholder={undefined}
                   onPointerEnterCapture={undefined}
                   onPointerLeaveCapture={undefined}
                 >
                   <Edit size="18" variant="Bold" className="mr-2" />
-                  {customers.is_paid ? "Mark as Unpaid" : "Mark as Paid"}
+                  {customers.is_paid ? "Already Paid" : "Mark as Paid"}
                 </MenuItem>
               )}
             </MenuList>

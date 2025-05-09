@@ -29,7 +29,7 @@ export interface Customers {
   send_date: Date | null;
   send_status: null | string;
   is_paid: boolean;
-
+  payment_date: Date | null;
   agent: Agent | null;
 }
 
