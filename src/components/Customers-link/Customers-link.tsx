@@ -103,7 +103,7 @@ const CustomersLink: React.FC = () => {
           setSubmitStatus({
             load: false,
             error: false,
-            message: "Link sent successfully",
+            message: "Email has been added to the queue",
           });
           setSelectedCustomers([]);
           getCustomers("", page);
