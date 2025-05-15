@@ -484,14 +484,14 @@ const CustomerList: React.FC<{
               {role === "admin" && (
                 <MenuItem
                   onClick={() => togglePaidStatus()}
-                  disabled={customers.is_paid}
-                  className={`flex items-center text-sm  hover:bg-blue-100 ${customers.is_paid ? "text-red-500 cursor-not-allowed" : "text-green-500"}`}
+                  // disabled={customers.is_paid}
+                  className={`flex items-center text-sm  hover:bg-blue-100 ${customers.is_paid ? "text-red-500" : "text-green-500"}`}
                   placeholder={undefined}
                   onPointerEnterCapture={undefined}
                   onPointerLeaveCapture={undefined}
                 >
                   <Edit size="18" variant="Bold" className="mr-2" />
-                  {customers.is_paid ? "Already Paid" : "Mark as Paid"}
+                  {customers.is_paid ? "Mark as Unpaid" : "Mark as Paid"}
                 </MenuItem>
               )}
             </MenuList>
