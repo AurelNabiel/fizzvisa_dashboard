@@ -456,7 +456,7 @@ const CustomerList: React.FC<{
       <EditSubmitted
         getData={() => getCustomers("", currentPage ?? 1, 0)}
         id={customers.ref_code}
-        name={customers.fullname ?? ""}
+        
         email={customers.email ?? ""}
         isOpen={editOpen}
         setIsOpen={setEditOpen}
