@@ -79,11 +79,15 @@ const DropdownNotification = () => {
             </div>
 
             <ul className="flex h-auto flex-col overflow-y-auto">
-              {customers.length > 0 ? (
+              {status.load ? (
+                <div className="flex h-full w-full items-center justify-center">
+                  Loading...
+                </div>
+              ) : customers.length > 0 ? (
                 customers.map((customer, index) => (
                   <li
                     key={index}
-                    className="flex items-center gap-x-2 justify-between border-b border-stroke px-4 py-3 text-sm font-medium text-bodydark2 last:border-b-0 dark:border-strokedark"
+                    className="flex items-center justify-between gap-x-2 border-b border-stroke px-4 py-3 text-sm font-medium text-bodydark2 last:border-b-0 dark:border-strokedark"
                   >
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium text-bodydark2 dark:text-white">
@@ -92,7 +96,11 @@ const DropdownNotification = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/submitted-links/${customer.id}`}
+                        onClick={() => {
+                          setNotifying(false);
+                          setDropdownOpen(false);
+                        }}
+                        href={`/submitted-links`}
                         className="text-sm font-medium text-primary hover:text-opacity-80"
                       >
                         View

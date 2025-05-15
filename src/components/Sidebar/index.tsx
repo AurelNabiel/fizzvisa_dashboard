@@ -325,10 +325,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   useEffect(() => {
     const userFromCookie = Cookies.get("user");
     const user = userFromCookie ? JSON.parse(userFromCookie) : null;
-    // console.log(user);
     if (user) {
       setType(user.user_type);
-      console.log(user);
     }
   }, []);
 

@@ -188,6 +188,7 @@ const CustomersLink: React.FC = () => {
                   Email
                 </th>
                 <th className="dark: px-4 py-4 font-medium text-black">Date</th>
+                <th className="dark: px-4 py-4 font-medium text-black">Link</th>
                 {/* <th className="dark: px-4 py-4 font-medium text-black">
                   Send Status
                 </th> */}
@@ -381,6 +382,9 @@ const CustomerList: React.FC<{
                 )
               : "Date not available"}
           </p>
+        </td>
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <p className="dark: text-black">{customers.ref_code}</p>
         </td>
         {/* <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p
