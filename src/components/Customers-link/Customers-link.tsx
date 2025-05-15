@@ -27,7 +27,7 @@ const CustomersLink: React.FC = () => {
   }, []);
 
   const getCustomers = async (key: string, page: number): Promise<void> => {
-    console.log(key);
+    // console.log(key);
     
     setStatus({ load: true, error: false });
     try {
@@ -188,9 +188,9 @@ const CustomersLink: React.FC = () => {
                   Email
                 </th>
                 <th className="dark: px-4 py-4 font-medium text-black">Date</th>
-                <th className="dark: px-4 py-4 font-medium text-black">
+                {/* <th className="dark: px-4 py-4 font-medium text-black">
                   Send Status
-                </th>
+                </th> */}
               </tr>
             </thead>
             <tbody>
@@ -382,7 +382,7 @@ const CustomerList: React.FC<{
               : "Date not available"}
           </p>
         </td>
-        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        {/* <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p
             className={`rounded-full px-3  py-1 text-center text-white  dark:text-white ${customers.send_status == null ? "bg-gray-400" : customers.send_status == "success" ? "bg-green-500" : "bg-red-500"}`}
           >
@@ -392,7 +392,7 @@ const CustomerList: React.FC<{
                 ? "Sent"
                 : "Failed"}
           </p>
-        </td>
+        </td> */}
       </tr>
      
     </>
