@@ -38,14 +38,13 @@ const schema = yup.object({
     .min(8, "Password must be at least 8 characters")
     .required("Password is required"),
   user_type: yup.string().required("User type is required"),
-  
+
   role: yup.string().required("Role is required"),
   agent_id: yup.number().when("role", (role, schema) => {
     return role[0] === "agent"
       ? schema.required("Agent ID is required")
       : schema.notRequired();
   }),
-
 });
 const Add: React.FC<AddProps> = ({ getData }) => {
   const token = Cookies.get("token");
@@ -60,7 +59,7 @@ const Add: React.FC<AddProps> = ({ getData }) => {
     resolver: yupResolver(schema),
   });
   const currentName = useWatch({ control, name: "username" }) || "";
-  const currentRole = useWatch({ control, name: "role" }) || "";
+  // const currentRole = useWatch({ control, name: "role" }) || "";
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   //   console.log(currentName);
   const [agent, setAgent] = React.useState<{
@@ -262,19 +261,18 @@ const Add: React.FC<AddProps> = ({ getData }) => {
           </div>
           <div>
             <label
-              htmlFor="role"
+              htmlFor="user_type"
               className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Role
+              User Type
             </label>
             <div className="relative">
               <select
-                {...register("role", { required: true })}
+                {...register("user_type", { required: true })}
                 className="ease w-full cursor-pointer appearance-none rounded border border-slate-200 bg-transparent py-2 pl-3 pr-8 text-sm text-slate-700 shadow-sm transition duration-300 placeholder:text-slate-400 hover:border-slate-400 focus:border-slate-400 focus:shadow-md focus:outline-none"
               >
-                <option value="">Pick a role</option>
                 <option value="admin">Admin</option>
-                <option value="agent">Agent</option>
+                <option value="staff">Staff</option>
               </select>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -291,7 +289,7 @@ const Add: React.FC<AddProps> = ({ getData }) => {
                 />
               </svg>
             </div>
-            {errors.role && (
+            {errors.user_type && (
               <Typography
                 className="mt-5 flex items-center gap-2 text-sm text-red-500"
                 placeholder={undefined}
@@ -310,11 +308,11 @@ const Add: React.FC<AddProps> = ({ getData }) => {
                     clip-rule="evenodd"
                   ></path>
                 </svg>
-                {errors.role.message}
+                {errors.user_type.message}
               </Typography>
             )}
           </div>
-          {currentRole === "agent" && (
+          {/* {currentRole === "agent" && (
             <div>
               <label
                 htmlFor="role"
@@ -372,25 +370,25 @@ const Add: React.FC<AddProps> = ({ getData }) => {
                 </Typography>
               )}
             </div>
-          )}
+          )} */}
           <div>
             <label
-              htmlFor="username"
+              htmlFor="role"
               className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              User Type
+              Role
             </label>
             <Input
               crossOrigin={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
-              {...register("user_type", { required: true })}
+              {...register("role", { required: true })}
               type="text"
-              placeholder="admin, agent, user"
+              placeholder="pick a role"
               autoComplete="false"
               className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             />
-            {errors.user_type && (
+            {errors.role && (
               <Typography
                 className="mt-5 flex items-center gap-2 text-sm text-red-500"
                 placeholder={undefined}
@@ -409,7 +407,7 @@ const Add: React.FC<AddProps> = ({ getData }) => {
                     clip-rule="evenodd"
                   ></path>
                 </svg>
-                {errors.user_type.message}
+                {errors.role.message}
               </Typography>
             )}
           </div>

@@ -82,7 +82,7 @@ const EditUsers: React.FC<EditProps> = ({
     resolver: yupResolver(schema),
   });
   // const currentName = useWatch({ control, name: "username" }) || "";
-  const currentUserType = useWatch({ control, name: "user_type" }) || "";
+  // const currentUserType = useWatch({ control, name: "user_type" }) || "";
 
   const [status, setStatus] = React.useState({ load: false, error: false });
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
@@ -178,7 +178,7 @@ const EditUsers: React.FC<EditProps> = ({
                 className="ease w-full cursor-pointer appearance-none rounded border border-slate-200 bg-transparent py-2 pl-3 pr-8 text-sm text-slate-700 shadow-sm transition duration-300 placeholder:text-slate-400 hover:border-slate-400 focus:border-slate-400 focus:shadow-md focus:outline-none"
               >
                 <option value="admin">Admin</option>
-                <option value="agent">Agent</option>
+                <option value="staff">Staff</option>
               </select>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -219,7 +219,7 @@ const EditUsers: React.FC<EditProps> = ({
             )}
           </div>
 
-          {currentUserType === "agent" || user_type === "agent" ? (
+          {/* {currentUserType === "agent" || user_type === "agent" ? (
             <div>
               <label
                 htmlFor="agent"
@@ -280,7 +280,7 @@ const EditUsers: React.FC<EditProps> = ({
                 </Typography>
               )}
             </div>
-          ) : null}
+          ) : null} */}
           <div>
             <label
               htmlFor="role"
