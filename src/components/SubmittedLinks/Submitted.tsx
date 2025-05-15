@@ -7,6 +7,8 @@ import Lottie from "react-lottie";
 import empty from "@/json/empty.json";
 import { useRouter } from "next/navigation";
 import { decryptData } from "./components/Decryption";
+import { Edit } from "iconsax-react";
+import EditSubmitted from "./components/Edit";
 
 const SubmittedLinks: React.FC = () => {
   const route = useRouter();
@@ -34,7 +36,7 @@ const SubmittedLinks: React.FC = () => {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_DEV_API}/customer?page=${page}&limit=10${
           key !== "" ? `&keyword=${key}` : ""
-        }&is_send_link=false`,
+        }&is_send_link=true`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -54,22 +56,30 @@ const SubmittedLinks: React.FC = () => {
     getCustomers("", page);
   }, [page]);
   // select
-  const [selectedCustomers, setSelectedCustomers] = React.useState<any[]>([]);
+  const [selectedCustomers, setSelectedCustomers] = React.useState<any[]>(
+    customers.filter((c) => c.send_status === "success"), // Auto-select customers with "success"
+  );
+
   const selectAll =
     customers.length > 0 && selectedCustomers.length === customers.length;
 
   const handleCheckboxChange = (customer: any) => {
+    if (customer.send_status === "success") return;
+
     setSelectedCustomers((prev) =>
       prev.includes(customer)
         ? prev.filter((c) => c !== customer)
         : [...prev, customer],
     );
   };
+
   const handleSelectAll = () => {
     if (selectAll) {
-      setSelectedCustomers([]); // Deselect all
+      setSelectedCustomers(
+        customers.filter((c) => c.send_status === "success"),
+      );
     } else {
-      setSelectedCustomers(customers); // Select all
+      setSelectedCustomers(customers);
     }
   };
 
@@ -80,9 +90,23 @@ const SubmittedLinks: React.FC = () => {
   });
   const handleSubmitSelected = async () => {
     setSubmitStatus({ load: true, error: false, message: "" });
+
     try {
+      const customersToSubmit = selectedCustomers.filter(
+        (customer) => customer.send_status !== "success",
+      );
+
+      if (customersToSubmit.length === 0) {
+        setSubmitStatus({
+          load: false,
+          error: true,
+          message: "No customers to submit",
+        });
+        return;
+      }
+
       const submit = {
-        data: selectedCustomers.map((customer) => {
+        data: customersToSubmit.map((customer) => {
           return {
             ref_code: decryptData(customer.ref_code),
             email: customer.email,
@@ -90,6 +114,7 @@ const SubmittedLinks: React.FC = () => {
           };
         }),
       };
+
       console.log(submit);
 
       await axios
@@ -124,6 +149,16 @@ const SubmittedLinks: React.FC = () => {
     }
   };
 
+  React.useEffect(() => {
+    setSelectedCustomers((prev) =>
+      Array.from(
+        new Set([
+          ...prev.filter((c) => c.send_status === "success"),
+          ...customers.filter((c) => c.send_status === "success"),
+        ]),
+      ),
+    );
+  }, [customers]);
   // filter agent
 
   // filter link sudah di send
@@ -188,13 +223,12 @@ const SubmittedLinks: React.FC = () => {
                   Email
                 </th>
                 <th className="dark: px-4 py-4 font-medium text-black">Date</th>
-                <th className="dark: px-4 py-4 font-medium text-black">
-                  Link
-                </th>
-                
+                <th className="dark: px-4 py-4 font-medium text-black">Link</th>
+
                 <th className="dark: px-4 py-4 font-medium text-black">
                   Submitted Date
                 </th>
+                <th className="dark: px-4 py-4 font-medium text-black">Edit</th>
               </tr>
             </thead>
             <tbody>
@@ -308,8 +342,18 @@ const SubmittedLinks: React.FC = () => {
           </nav>
           <button
             onClick={handleSubmitSelected}
-            className={` rounded-lg border px-4 py-2 text-white  hover:bg-opacity-90 ${selectedCustomers.length === 0 || submitStatus.load ? "cursor-not-allowed bg-gray-300" : "bg-primary"}`}
-            disabled={selectedCustomers.length === 0 || submitStatus.load}
+            className={`rounded-lg border px-4 py-2 text-white hover:bg-opacity-90 ${
+              selectedCustomers.length === 0 ||
+              submitStatus.load ||
+              selectedCustomers.every((c) => c.send_status === "success")
+                ? "cursor-not-allowed bg-gray-300"
+                : "bg-primary"
+            }`}
+            disabled={
+              selectedCustomers.length === 0 ||
+              submitStatus.load ||
+              selectedCustomers.every((c) => c.send_status === "success")
+            }
           >
             {submitStatus.load ? "Sending..." : "Send Link"}
           </button>
@@ -338,8 +382,7 @@ const CustomerList: React.FC<{
 
   role,
 }) => {
-  const [assignOpen, setAssingOpen] = React.useState<boolean>(false);
-  const [deleteOpen, setDeleteOpen] = React.useState<boolean>(false);
+  const [editOpen, setEditOpen] = React.useState(false);
   const decryptedRefCode = decryptData(customers.ref_code);
   // console.log(decryptedRefCode, "HAI", customers.fullname);
   const route = useRouter();
@@ -371,7 +414,7 @@ const CustomerList: React.FC<{
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="dark: text-black">{customers.email}</p>
         </td>
-         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="dark: text-black">
             {customers.ref_code_created_date
               ? new Date(customers.ref_code_created_date).toLocaleDateString(
@@ -399,8 +442,25 @@ const CustomerList: React.FC<{
               : "Date not available"}
           </p>
         </td>
-       
+        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+          <Edit
+            onClick={() => {
+              setEditOpen(true);
+            }}
+            size="18"
+            variant="Bold"
+            className="mr-2 cursor-pointer hover:text-green-500"
+          />
+        </td>
       </tr>
+      <EditSubmitted
+        getData={() => getCustomers("", currentPage ?? 1, 0)}
+        id={customers.ref_code}
+        name={customers.fullname ?? ""}
+        email={customers.email ?? ""}
+        isOpen={editOpen}
+        setIsOpen={setEditOpen}
+      />
     </>
   );
 };

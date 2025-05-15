@@ -1,11 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import ClickOutside from "@/components/ClickOutside";
+import { Customers } from "../SubmittedLinks/components/data/Model";
+import Cookies from "js-cookie";
+import axios from "axios";
 
 const DropdownNotification = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
+  const token = Cookies.get("token");
 
+  const [customers, setCustomers] = useState<Customers[]>([]);
+  const [status, setStatus] = useState({ load: false, error: false });
+  const getData = async () => {
+    try {
+      setStatus({ load: true, error: false });
+      await axios
+        .get(`${process.env.NEXT_PUBLIC_DEV_API}/customer?send_status=failed`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          setCustomers(res.data.data);
+          setStatus({ load: false, error: false });
+        });
+    } catch (error) {
+      console.log(error);
+      setStatus({ load: false, error: true });
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <li>
@@ -51,69 +79,34 @@ const DropdownNotification = () => {
             </div>
 
             <ul className="flex h-auto flex-col overflow-y-auto">
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  href="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      Edit your information in a swipe
-                    </span>{" "}
-                    Sint occaecat cupidatat non proident, sunt in culpa qui
-                    officia deserunt mollit anim.
+              {customers.length > 0 ? (
+                customers.map((customer, index) => (
+                  <li
+                    key={index}
+                    className="flex items-center gap-x-2 justify-between border-b border-stroke px-4 py-3 text-sm font-medium text-bodydark2 last:border-b-0 dark:border-strokedark"
+                  >
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-bodydark2 dark:text-white">
+                        {customer.fullname} has not been sent a notification.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/submitted-links/${customer.id}`}
+                        className="text-sm font-medium text-primary hover:text-opacity-80"
+                      >
+                        View
+                      </Link>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <li className="flex items-center justify-between border-b border-stroke px-4 py-3 text-sm font-medium text-bodydark2 last:border-b-0 dark:border-strokedark">
+                  <p className="text-sm font-medium text-bodydark2 dark:text-white">
+                    No notifications
                   </p>
-
-                  <p className="text-xs">12 May, 2025</p>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  href="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      It is a long established fact
-                    </span>{" "}
-                    that a reader will be distracted by the readable.
-                  </p>
-
-                  <p className="text-xs">24 Feb, 2025</p>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  href="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      There are many variations
-                    </span>{" "}
-                    of passages of Lorem Ipsum available, but the majority have
-                    suffered
-                  </p>
-
-                  <p className="text-xs">04 Jan, 2025</p>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  href="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      There are many variations
-                    </span>{" "}
-                    of passages of Lorem Ipsum available, but the majority have
-                    suffered
-                  </p>
-
-                  <p className="text-xs">01 Dec, 2024</p>
-                </Link>
-              </li>
+                </li>
+              )}
             </ul>
           </div>
         )}
