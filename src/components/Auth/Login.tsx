@@ -50,7 +50,7 @@ const Login: React.FC = () => {
 
           Cookies.set("token", res.data.token);
           Cookies.set("user", JSON.stringify(res.data.data));
-          router.replace(`/`);
+          router.replace(`/customers/add`);
           setSubmitStatus({ load: false, error: "" });
         });
     } catch (error) {
