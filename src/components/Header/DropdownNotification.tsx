@@ -91,7 +91,7 @@ const DropdownNotification = () => {
                   >
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium text-bodydark2 dark:text-white">
-                        {customer.fullname} has not been sent a notification.
+                        An error occurred while sending a link to {customer.email}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
