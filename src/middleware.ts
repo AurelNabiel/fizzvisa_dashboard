@@ -17,7 +17,7 @@ export function middleware(req: NextRequest) {
   } else {
  
     if (url.pathname.startsWith(`${basePath}/auth/signin`)) {
-      return NextResponse.redirect(new URL(`${basePath}/`, req.url));
+      return NextResponse.redirect(new URL(`${basePath}/customers/add`, req.url));
     }
   }
 

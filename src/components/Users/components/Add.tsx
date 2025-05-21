@@ -88,12 +88,27 @@ const Add: React.FC<AddProps> = ({ getData }) => {
     getAgent();
   }, []);
 
+  const [permission, setPermission] = React.useState({
+    add: false,
+    modify: false,
+    delete: false,
+    view: false,
+    approve: false,
+  });
   const [status, setStatus] = React.useState({ load: false, error: false });
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     setStatus({ load: true, error: false });
     try {
+      const submitData = {
+        ...data,
+        add: permission.add,
+        modify: permission.modify,
+        delete: permission.delete,
+        view: permission.view,
+        approve: permission.approve,
+      }
       await axios
-        .post(`${process.env.NEXT_PUBLIC_DEV_API}/users/add`, data, {
+        .post(`${process.env.NEXT_PUBLIC_DEV_API}/users/add`, submitData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -411,6 +426,68 @@ const Add: React.FC<AddProps> = ({ getData }) => {
               </Typography>
             )}
           </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="add"
+              onChange={(e) => {
+                setPermission({ ...permission, add: e.target.checked });
+              }}
+            />
+            <label htmlFor="add" className="text-sm text-gray-700 dark:text-gray-300">
+              Add
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="modify"
+              onChange={(e) => {
+                setPermission({ ...permission, modify: e.target.checked });
+              }}
+            />
+            <label htmlFor="modify" className="text-sm text-gray-700 dark:text-gray-300">
+              Modify
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="delete"
+              onChange={(e) => {
+                setPermission({ ...permission, delete: e.target.checked });
+              }}
+            />
+            <label htmlFor="delete" className="text-sm text-gray-700 dark:text-gray-300">
+              Delete
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="view"
+              onChange={(e) => {
+                setPermission({ ...permission, view: e.target.checked });
+              }}
+            />
+            <label htmlFor="view" className="text-sm text-gray-700 dark:text-gray-300">
+              View
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="approve"
+              onChange={(e) => {
+                setPermission({ ...permission, approve: e.target.checked });
+              }}
+            />
+            <label htmlFor="approve" className="text-sm text-gray-700 dark:text-gray-300">
+              Approve
+            </label>
+          </div>
+          {/* Error Message */}
+          
           {status.error && (
             <Typography
               className="mt-5 flex items-center gap-2 text-sm text-red-500"

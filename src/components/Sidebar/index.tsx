@@ -335,7 +335,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     menuItems: group.menuItems.filter((item) => {
       if (userType === "admin") return true; // Admin sees all menu items
       if (
-        userType === "agent" &&
+        userType === "staff" &&
         (item.label === "Dashboard" || item.label === "Customers List")
       )
         return true; // Agent sees Dashboard and Assign Agent
