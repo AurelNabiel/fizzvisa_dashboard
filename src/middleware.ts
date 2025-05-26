@@ -6,25 +6,30 @@ const basePath =
     : "";
 
 export function middleware(req: NextRequest) {
-  const cookies = cookie.parse(req.headers.get("cookie") || ""); 
+  const cookies = cookie.parse(req.headers.get("cookie") || "");
   const url = new URL(req.url);
-
-
+  // check if the user type on cookies is staff or admin
+  const userFromCookie = cookies.user; // Default to 'guest' if not set
+  const user = userFromCookie ? JSON.parse(userFromCookie) : null;
+  
   if (!cookies.token) {
     if (!url.pathname.startsWith(`${basePath}/auth/signin`)) {
       return NextResponse.redirect(new URL(`${basePath}/auth/signin`, req.url));
     }
   } else {
- 
     if (url.pathname.startsWith(`${basePath}/auth/signin`)) {
-      return NextResponse.redirect(new URL(`${basePath}/customers/add`, req.url));
+      return NextResponse.redirect(
+        new URL(
+          `${user.user_type == "admin" ? `${basePath}/customers-link` : `${basePath}/customers/add`}`,
+          req.url,
+        ),
+      );
     }
   }
 
-
-  return NextResponse.next(); 
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/auth/signin", "/customers", "/", "/agents", "/settings"], 
+  matcher: ["/auth/signin", "/customers", "/", "/agents", "/settings"],
 };

@@ -5,7 +5,16 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import Import from "./components/Import";
 import Edit from "./components/Edit";
+import { useRouter } from "next/navigation";
 const CustomerAdd: React.FC = () => {
+  const router = useRouter();
+  React.useEffect(() => {
+    const userFromCookie = Cookies.get("user");
+    const user = userFromCookie ? JSON.parse(userFromCookie) : null;
+    if (user.user_type === "staff") {
+      router.replace("/customers-link");
+    }
+  }, []);
   const [customers, setCustomers] = React.useState<any[]>([]);
   const [selectedCustomers, setSelectedCustomers] = React.useState<any[]>([]);
   const [status, setStatus] = React.useState<any>({
@@ -18,7 +27,6 @@ const CustomerAdd: React.FC = () => {
   const handleAddCustomer = (customer: any) => {
     setCustomers((prev) => [...prev, customer]);
     console.log(customer);
-    
   };
 
   const handleCheckboxChange = (customer: any) => {
@@ -39,7 +47,7 @@ const CustomerAdd: React.FC = () => {
     }
   };
   // Save selected customers
-  const handleSaveSelected = async () => {
+  const handleSaveSelected: () => Promise<void> = async () => {
     // console.log("Saved Customers:", selectedCustomers);
     setStatus({ load: true, error: false, message: "" });
     try {
@@ -211,7 +219,7 @@ const CustomerList: React.FC<{
   handleCheckboxChange,
   deleteCustomer,
   onAddCustomer,
-  onEditCustomer
+  onEditCustomer,
 }) => {
   const [openEdit, setOpenEdit] = React.useState<boolean>(false);
   // console.log(customer);

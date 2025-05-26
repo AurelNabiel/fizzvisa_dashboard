@@ -336,7 +336,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       if (userType === "admin") return true; // Admin sees all menu items
       if (
         userType === "staff" &&
-        (item.label === "Dashboard" || item.label === "Customers List")
+        (item.label != "Create Link")
       )
         return true; // Agent sees Dashboard and Assign Agent
       return false; // Exclude other items

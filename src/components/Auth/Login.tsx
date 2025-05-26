@@ -46,11 +46,13 @@ const Login: React.FC = () => {
       await axios
         .post(`${process.env.NEXT_PUBLIC_DEV_API}/users/login`, data)
         .then((res) => {
-          console.log(res.data);
+          console.log(res.data.data.user_type);
 
           Cookies.set("token", res.data.token);
           Cookies.set("user", JSON.stringify(res.data.data));
-          router.replace(`/customers/add`);
+          router.replace(
+            `${res.data.data.user_type == "admin" ? `/customers/add` : `/customers-link`}`,
+          );
           setSubmitStatus({ load: false, error: "" });
         });
     } catch (error) {

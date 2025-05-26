@@ -208,6 +208,9 @@ const Customers: React.FC = () => {
                     onChange={handleSelectAll}
                   />
                 </th> */}
+                <th className="dark: min-w-[220px] px-2 py-4 font-medium text-black xl:pl-11">
+                  No.
+                </th>
                 <th className="dark: min-w-[220px] px-4 py-4 font-medium text-black xl:pl-11">
                   Referal Code
                 </th>
@@ -385,7 +388,9 @@ const CustomerList: React.FC<{
                 ? {
                     ...cust,
                     is_paid: updatedPaidStatus,
-                    payment_date: updatedPaymentDate ? new Date(updatedPaymentDate) : null,
+                    payment_date: updatedPaymentDate
+                      ? new Date(updatedPaymentDate)
+                      : null,
                   }
                 : cust,
             ),
@@ -400,6 +405,9 @@ const CustomerList: React.FC<{
   return (
     <>
       <tr>
+         <td className="border-b border-[#eee] px-2 py-5 pl-9 dark:border-strokedark xl:pl-11">
+          <h5 className="dark: font-medium text-black">{customers.id}</h5>
+        </td>
         <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
           <h5 className="dark: font-medium text-black">{decryptedRefCode}</h5>
         </td>
