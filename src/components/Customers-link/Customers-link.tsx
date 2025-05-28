@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import type {  Customers } from "./components/data/Model";
+import type { Customers } from "./components/data/Model";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Lottie from "react-lottie";
@@ -28,7 +28,7 @@ const CustomersLink: React.FC = () => {
 
   const getCustomers = async (key: string, page: number): Promise<void> => {
     // console.log(key);
-    
+
     setStatus({ load: true, error: false });
     try {
       const response = await axios.get(
@@ -142,7 +142,7 @@ const CustomersLink: React.FC = () => {
               onChange={(e) => {
                 if (e.target.value.length > 2) {
                   getCustomers(e.target.value, 1);
-                  setPage(1); 
+                  setPage(1);
                 } else {
                   getCustomers("", 1);
                   setPage(1);
@@ -205,7 +205,6 @@ const CustomersLink: React.FC = () => {
                       customers={data}
                       getCustomers={getCustomers}
                       currentPage={page}
-
                       role={role}
                     />
                   ))
@@ -372,12 +371,15 @@ const CustomerList: React.FC<{
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="dark: text-black">
             {customers.ref_code_created_date
-              ? new Date(customers.ref_code_created_date).toLocaleDateString(
+              ? new Date(customers.ref_code_created_date).toLocaleString(
                   "en-US",
                   {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
                   },
                 )
               : "Date not available"}
@@ -398,7 +400,6 @@ const CustomerList: React.FC<{
           </p>
         </td> */}
       </tr>
-     
     </>
   );
 };

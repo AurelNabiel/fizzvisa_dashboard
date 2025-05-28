@@ -78,7 +78,7 @@ const Customers: React.FC = () => {
     if (selectAll) {
       setSelectedCustomers([]); // Deselect all
     } else {
-      setSelectedCustomers(customers); // Select all
+      setSelectedCustomers(customers.map((i) => i.id)); // Select all
     }
   };
 
@@ -87,6 +87,43 @@ const Customers: React.FC = () => {
     error: false,
     message: "",
   });
+
+  const handleDownload = async () => {
+    try {
+      setSubmitStatus({ load: true, error: false, message: "" });
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_DEV_API}/customer/download?customer_ids=${selectedCustomers.join(",")}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob", // Important for downloading files
+        },
+      );
+
+      // Create a link element to download the file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "customers_data.xlsx"); // Set the file name
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setSubmitStatus({
+        load: false,
+        error: false,
+        message: "Data downloaded successfully",
+      });
+    } catch (error) {
+      console.log(error);
+      setSubmitStatus({
+        load: false,
+        error: true,
+        message: "Failed to download data",
+      });
+    }
+  };
 
   React.useEffect(() => {
     getCustomers("", page);
@@ -116,13 +153,20 @@ const Customers: React.FC = () => {
                 }
               }}
             />
+            <Button
+              onClick={() => {
+                handleDownload();
+                setSelectedCustomers([]);
+              }}
+              disabled={selectedCustomers.length === 0}
+              className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
+            >
+              {selectedCustomers.length > 0
+                ? `Download ${selectedCustomers.length} Customer(s)`
+                : "Download"}
+            </Button>
             {/* {role === "admin" && (
-              <Button
-                onClick={() => route.push("/customers/add")}
-                className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
-              >
-                Add +
-              </Button>
+             
             )}
             <Listbox value={selectedAgents} onChange={handleFilter}>
               <div className="relative">
@@ -233,6 +277,14 @@ const Customers: React.FC = () => {
                 <th className="dark: px-4 py-4 font-medium text-black">
                   Actions
                 </th>
+                <th className="dark: min-w-[40px] px-4 py-4 pl-9 font-medium text-black xl:pl-11">
+                  <input
+                    type="checkbox"
+                    className="rounded-md border-gray-300 text-primary focus:border-primary"
+                    checked={selectAll}
+                    onChange={handleSelectAll}
+                  />
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -245,6 +297,8 @@ const Customers: React.FC = () => {
                       getCustomers={getCustomers}
                       currentPage={page}
                       role={role}
+                      selectedCustomers={selectedCustomers}
+                      handleCheckboxChange={handleCheckboxChange}
                     />
                   ))
                 : [...Array(5)].map((_, key) => <CustomerLoader key={key} />)}
@@ -353,9 +407,19 @@ const CustomerList: React.FC<{
   customers: Customers;
   getCustomers: (key: string, page: number) => Promise<void>;
   setCustomers: React.Dispatch<React.SetStateAction<Customers[]>>;
+  selectedCustomers: any[];
+  handleCheckboxChange: (customer: any) => void;
 
   role: string;
-}> = ({ customers, getCustomers, currentPage, setCustomers, role }) => {
+}> = ({
+  customers,
+  getCustomers,
+  currentPage,
+  setCustomers,
+  role,
+  selectedCustomers,
+  handleCheckboxChange,
+}) => {
   const [editOpen, setEditOpen] = React.useState<boolean>(false);
   const decryptedRefCode = decryptData(customers.ref_code);
   // console.log(decryptedRefCode, "HAI", customers.fullname);
@@ -405,7 +469,7 @@ const CustomerList: React.FC<{
   return (
     <>
       <tr>
-         <td className="border-b border-[#eee] px-2 py-5 pl-9 dark:border-strokedark xl:pl-11">
+        <td className="border-b border-[#eee] px-2 py-5 pl-9 dark:border-strokedark xl:pl-11">
           <h5 className="dark: font-medium text-black">{customers.id}</h5>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
@@ -425,12 +489,15 @@ const CustomerList: React.FC<{
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="dark: text-black">
             {customers.ref_code_created_date
-              ? new Date(customers.ref_code_created_date).toLocaleDateString(
+              ? new Date(customers.ref_code_created_date).toLocaleString(
                   "en-US",
                   {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
                   },
                 )
               : "Date not available"}
@@ -451,10 +518,13 @@ const CustomerList: React.FC<{
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="dark: text-black">
             {customers.payment_date
-              ? new Date(customers.payment_date).toLocaleDateString("en-US", {
+              ? new Date(customers.payment_date).toLocaleString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
                 })
               : "Date not available"}
           </p>
@@ -504,6 +574,16 @@ const CustomerList: React.FC<{
               )}
             </MenuList>
           </Menu>
+        </td>
+        <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
+          <input
+            type="checkbox"
+            className="rounded-md border-gray-300 text-primary focus:border-primary"
+            checked={selectedCustomers.includes(customers.id)}
+            onChange={() => {
+              handleCheckboxChange(customers.id);
+            }}
+          />
         </td>
       </tr>
     </>
