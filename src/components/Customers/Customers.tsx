@@ -115,6 +115,9 @@ const Customers: React.FC = () => {
         error: false,
         message: "Data downloaded successfully",
       });
+      setTimeout(() => {
+        setSubmitStatus({ load: false, error: false, message: "" });
+      }, 3000);
     } catch (error) {
       console.log(error);
       setSubmitStatus({
@@ -122,6 +125,9 @@ const Customers: React.FC = () => {
         error: true,
         message: "Failed to download data",
       });
+      setTimeout(() => {
+        setSubmitStatus({ load: false, error: false, message: "" });
+      }, 3000);
     }
   };
 
@@ -159,7 +165,7 @@ const Customers: React.FC = () => {
                 setSelectedCustomers([]);
               }}
               disabled={selectedCustomers.length === 0}
-              className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
+              className={`w-full cursor-pointer rounded-lg border border-primary ${selectedCustomers.length === 0 ? "cursor-not-allowed opacity-50" : ""} bg-primary px-4 py-2 text-white transition hover:bg-opacity-90`}
             >
               {selectedCustomers.length > 0
                 ? `Download ${selectedCustomers.length} Customer(s)`
