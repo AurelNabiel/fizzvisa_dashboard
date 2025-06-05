@@ -424,12 +424,15 @@ const CustomerList: React.FC<{
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="dark: text-black">
             {customers.ref_code_created_date
-              ? new Date(customers.ref_code_created_date).toLocaleDateString(
+              ? new Date(customers.ref_code_created_date).toLocaleString(
                   "en-US",
                   {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
                   },
                 )
               : "Date not available"}
@@ -441,10 +444,13 @@ const CustomerList: React.FC<{
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="dark: text-black">
             {customers.send_date
-              ? new Date(customers.send_date).toLocaleDateString("en-US", {
+              ? new Date(customers.send_date).toLocaleString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
                 })
               : "Date not available"}
           </p>
