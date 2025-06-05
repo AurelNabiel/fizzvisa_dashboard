@@ -210,6 +210,9 @@ const SubmittedLinks: React.FC = () => {
                     onChange={handleSelectAll}
                   />
                 </th>
+                <th className="dark: min-w-[20px] px-1 py-4 font-medium text-black xl:pl-11">
+                  No.
+                </th>
                 <th className="dark: min-w-[220px] px-4 py-4 font-medium text-black xl:pl-11">
                   Referal Code
                 </th>
@@ -400,6 +403,9 @@ const CustomerList: React.FC<{
             }}
           />
         </td>
+        <th className="dark: min-w-[20px] px-1 py-4 font-medium text-black xl:pl-11">
+          No.
+        </th>
         <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
           <h5 className="dark: font-medium text-black">{decryptedRefCode}</h5>
         </td>
@@ -456,7 +462,6 @@ const CustomerList: React.FC<{
       <EditSubmitted
         getData={() => getCustomers("", currentPage ?? 1, 0)}
         id={customers.ref_code}
-        
         email={customers.email ?? ""}
         isOpen={editOpen}
         setIsOpen={setEditOpen}

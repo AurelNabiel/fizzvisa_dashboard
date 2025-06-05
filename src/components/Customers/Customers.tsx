@@ -258,7 +258,7 @@ const Customers: React.FC = () => {
                     onChange={handleSelectAll}
                   />
                 </th> */}
-                <th className="dark: min-w-[220px] px-2 py-4 font-medium text-black xl:pl-11">
+                <th className="dark: min-w-[20px] px-1 py-4 font-medium text-black xl:pl-11">
                   No.
                 </th>
                 <th className="dark: min-w-[220px] px-4 py-4 font-medium text-black xl:pl-11">
@@ -297,6 +297,7 @@ const Customers: React.FC = () => {
               {!status.load
                 ? customers.map((data, key) => (
                     <CustomerList
+                      num={key}
                       key={key}
                       customers={data}
                       setCustomers={setCustomers}
@@ -409,13 +410,13 @@ const Customers: React.FC = () => {
 };
 
 const CustomerList: React.FC<{
-  currentPage?: number;
+  currentPage: number;
   customers: Customers;
   getCustomers: (key: string, page: number) => Promise<void>;
   setCustomers: React.Dispatch<React.SetStateAction<Customers[]>>;
   selectedCustomers: any[];
   handleCheckboxChange: (customer: any) => void;
-
+  num: number;
   role: string;
 }> = ({
   customers,
@@ -423,6 +424,7 @@ const CustomerList: React.FC<{
   currentPage,
   setCustomers,
   role,
+  num,
   selectedCustomers,
   handleCheckboxChange,
 }) => {
@@ -430,7 +432,7 @@ const CustomerList: React.FC<{
   const decryptedRefCode = decryptData(customers.ref_code);
   // console.log(decryptedRefCode, "HAI", customers.fullname);
   const route = useRouter();
-
+  
   const togglePaidStatus = async () => {
     try {
       const updatedPaidStatus = !customers.is_paid;
@@ -475,8 +477,10 @@ const CustomerList: React.FC<{
   return (
     <>
       <tr>
-        <td className="border-b border-[#eee] px-2 py-5 pl-9 dark:border-strokedark xl:pl-11">
-          <h5 className="dark: font-medium text-black">{customers.id}</h5>
+        <td className="border-b border-[#eee] px-1 py-5 pl-9 dark:border-strokedark xl:pl-11">
+          <h5 className="dark: font-medium text-black">
+            {(currentPage - 1) * 10 + num + 1}
+          </h5>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
           <h5 className="dark: font-medium text-black">{decryptedRefCode}</h5>
