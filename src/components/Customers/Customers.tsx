@@ -36,7 +36,7 @@ const Customers: React.FC = () => {
     const user = userFromCookie ? JSON.parse(userFromCookie) : null;
     // console.log(user);
     if (user) {
-      setRole(user.role);
+      setRole(user.user_type);
     }
   }, []);
 

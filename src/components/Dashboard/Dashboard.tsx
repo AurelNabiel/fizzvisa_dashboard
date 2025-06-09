@@ -66,9 +66,9 @@ const Dashboard: React.FC = () => {
         <div className="col-span-12 xl:col-span-6">
           <ChartTotalSentLink />
         </div>
-        <div className="col-span-12 md:col-span-6">
+        {/* <div className="col-span-12 md:col-span-6">
           <ChartTotalCustomerSubmission />
-        </div>
+        </div> */}
         {/* <div className="col-span-12">
           <ChartMostAssignedAgent />
         </div> */}

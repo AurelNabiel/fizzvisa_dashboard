@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -145,7 +145,7 @@ const menuGroups = [
       // },
     ],
   },
-   {
+  {
     name: "Reports",
     menuItems: [
       {
@@ -210,7 +210,6 @@ const menuGroups = [
         label: "Dashboard",
         route: "/",
       },
-      
     ],
   },
   {
@@ -317,31 +316,55 @@ const menuGroups = [
   },
 ];
 
+interface UserAccess {
+  add: boolean;
+  approve: boolean;
+  delete: boolean;
+  modify: boolean;
+}
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
   const [userType, setType] = useState<string>("");
-
+  const [access, setAccess] = React.useState<UserAccess>({
+    add: false,
+    modify: false,
+    delete: false,
+    approve: false,
+  });
   useEffect(() => {
     const userFromCookie = Cookies.get("user");
     const user = userFromCookie ? JSON.parse(userFromCookie) : null;
     if (user) {
       setType(user.user_type);
+      setAccess({
+        add: user.user_access.add,
+        modify: user.user_access.modify,
+        delete: user.user_access.delete,
+        approve: user.user_access.approve,
+      });
+      console.log(user.user_type, "user type");
     }
   }, []);
 
-  const filteredMenuGroups = menuGroups.map((group) => ({
-    ...group,
-    menuItems: group.menuItems.filter((item) => {
-      if (userType === "admin") return true; // Admin sees all menu items
-      if (
-        userType === "staff" &&
-        (item.label != "Create Link")
-      )
-        return true; // Agent sees Dashboard and Assign Agent
-      return false; // Exclude other items
-    }),
-  }));
+  useEffect(() => {
+    console.log(access, "access");
+  }, [access]);
+
+  const filteredMenuGroups = useMemo(() => {
+    return menuGroups.map((group) => ({
+      ...group,
+      menuItems: group.menuItems.filter((item) => {
+        if (userType === "admin") return true;
+        if (userType === "staff") {
+          if (access.add) return true;
+          return item.label !== "Create Link";
+        }
+        return false;
+      }),
+    }));
+  }, [menuGroups, userType, access]);
+
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside

@@ -37,14 +37,15 @@ const Users: React.FC = () => {
     updated_at: new Date(),
   });
 
-  const [email , setEmail] = React.useState<string>("");
-
+  const [email, setEmail] = React.useState<string>("");
+  const [userType, setUserType] = React.useState<string>("");
   React.useEffect(() => {
     const userCookie = Cookies.get("user");
     if (userCookie) {
       const user = JSON.parse(userCookie);
       setEmail(user.email);
       setAccess(user.user_access);
+      setUserType(user.user_type);
     } else {
       route.push("/auth/signin");
     }
@@ -125,14 +126,18 @@ const Users: React.FC = () => {
                 }
               }}
             />
-            {access.add && <Add getData={getData} />}
+            {access.add && userType !== "staff" ? (
+              <Add getData={getData} />
+            ) : (
+              <></>
+            )}
           </div>
         </div>
         <div className="max-w-full overflow-x-auto">
           <table className="w-full table-auto">
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                <th className="min-w-[20px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                   No.
                 </th>
                 <th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white">
@@ -144,12 +149,14 @@ const Users: React.FC = () => {
                 <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
                   User Type
                 </th>
-                <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
-                  Role
-                </th>
-                <th className="px-4 py-4 font-medium text-black dark:text-white">
-                  Actions
-                </th>
+
+                {(access.modify || access.delete) && userType !== "staff" ? (
+                  <th className="min-w-[100px] px-4 py-4 font-medium text-black dark:text-white">
+                    Actions
+                  </th>
+                ) : (
+                  <></>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -158,6 +165,9 @@ const Users: React.FC = () => {
                     .filter((user) => user.email !== email)
                     .map((user: Datum, key: React.Key | null | undefined) => (
                       <UsersList
+                        userType={userType}
+                        currentPage={page}
+                        num={key}
                         page={page}
                         key={key}
                         getData={getData}
@@ -272,15 +282,20 @@ const UsersList: React.FC<{
   getData: (key: string, page: number) => Promise<void>;
   agent?: Agent[];
   page: number;
+  num: React.Key | null | undefined;
   access: UserAccess;
-}> = ({ users, getData, page, agent, access }) => {
+  currentPage: number;
+  userType: string;
+}> = ({ users, getData, page, agent, access, num, currentPage, userType }) => {
   const [openDelete, setOpenDelete] = React.useState<boolean>(false);
   const [openEdit, setOpenEdit] = React.useState<boolean>(false);
   return (
     <>
       <tr>
         <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
-          <h5 className="dark: font-medium text-black">{users.id}</h5>
+          <h5 className="dark: font-medium text-black">
+            {(currentPage - 1) * 10 + (typeof num === "number" ? num : 0) + 1}
+          </h5>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="text-black dark:text-white">{users.username}</p>
@@ -291,12 +306,10 @@ const UsersList: React.FC<{
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="text-black dark:text-white">{users.user_type}</p>
         </td>
-        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-          <p className="text-black dark:text-white">{users.role}</p>
-        </td>
+
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <div className="flex items-center space-x-3.5">
-            {access.modify && (
+            {access.modify && userType !== "staff" ? (
               <button
                 onClick={() => {
                   setOpenEdit(true);
@@ -305,8 +318,10 @@ const UsersList: React.FC<{
               >
                 <Edit size="18" variant="Bold" />
               </button>
+            ) : (
+              <></>
             )}
-            {access.delete && (
+            {access.delete && userType !== "staff" ? (
               <button
                 onClick={() => {
                   setOpenDelete(true);
@@ -315,6 +330,8 @@ const UsersList: React.FC<{
               >
                 <Trash size="18" variant="Bold" />
               </button>
+            ) : (
+              <></>
             )}
           </div>
         </td>
