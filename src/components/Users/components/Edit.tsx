@@ -88,8 +88,20 @@ const EditUsers: React.FC<EditProps> = ({
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     setStatus({ load: true, error: false });
     try {
+      const submittedData = {
+        username: data.username,
+        user_type: data.user_type,
+        // role: data.role,
+        // agent_id: data.agent_id,
+        user_access: {
+          add: data.add,
+          modify: data.modify,
+          delete: data.delete,
+          approve: data.approve,
+        },
+      };
       await axios
-        .put(`${process.env.NEXT_PUBLIC_DEV_API}/users/${id}`, data, {
+        .put(`${process.env.NEXT_PUBLIC_DEV_API}/users/${id}`, submittedData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

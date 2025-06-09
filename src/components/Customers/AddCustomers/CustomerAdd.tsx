@@ -12,7 +12,9 @@ const CustomerAdd: React.FC = () => {
     const userFromCookie = Cookies.get("user");
     const user = userFromCookie ? JSON.parse(userFromCookie) : null;
     if (user.user_type === "staff") {
-      router.replace("/customers-link");
+      if (!user.user_access.add) {
+        router.push("/customers-link");
+      }
     }
   }, []);
   const [customers, setCustomers] = React.useState<any[]>([]);
