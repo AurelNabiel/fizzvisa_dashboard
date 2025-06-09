@@ -60,11 +60,15 @@ const SubmittedLinks: React.FC = () => {
     customers.filter((c) => c.send_status === "success"), // Auto-select customers with "success"
   );
 
+  const selectableCustomers = customers.filter(
+    (c) => c.send_status !== "success",
+  );
   const selectAll =
-    customers.length > 0 && selectedCustomers.length === customers.length;
+    selectableCustomers.length > 0 &&
+    selectableCustomers.every((c) => selectedCustomers.includes(c));
 
   const handleCheckboxChange = (customer: any) => {
-    if (customer.send_status === "success") return;
+    if (customer.send_status === "success") return; // tidak boleh ubah yang success
 
     setSelectedCustomers((prev) =>
       prev.includes(customer)
@@ -75,11 +79,17 @@ const SubmittedLinks: React.FC = () => {
 
   const handleSelectAll = () => {
     if (selectAll) {
+      // Hapus semua kecuali yang send_status "success"
       setSelectedCustomers(
         customers.filter((c) => c.send_status === "success"),
       );
     } else {
-      setSelectedCustomers(customers);
+      // Pilih semua pelanggan kecuali yang send_status "success"
+      const selectable = customers.filter((c) => c.send_status !== "success");
+      const alreadySelectedSuccess = selectedCustomers.filter(
+        (c) => c.send_status === "success",
+      );
+      setSelectedCustomers([...alreadySelectedSuccess, ...selectable]);
     }
   };
 
@@ -402,27 +412,44 @@ const CustomerList: React.FC<{
             onChange={() => {
               handleCheckboxChange(customers);
             }}
+            disabled={customers.send_status === "success"}
           />
         </td>
         <th className="dark: min-w-[20px] px-1 py-4 font-medium text-black xl:pl-11">
           {(currentPage - 1) * 10 + num + 1}
         </th>
         <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
-          <h5 className="dark: font-medium text-black">{decryptedRefCode}</h5>
+          <h5
+            className={`dark: font-medium ${customers.send_status == "success" ? "text-success" : "text-black"}`}
+          >
+            {decryptedRefCode}
+          </h5>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-          <p className="dark: text-black">
+          <p
+            className={`${customers.send_status == "success" ? "text-success" : "text-black"}`}
+          >
             {customers.first_name ?? customers.fullname ?? "Unknown"}
           </p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-          <p className="dark: text-black">{customers.phone}</p>
+          <p
+            className={`${customers.send_status == "success" ? "text-success" : "text-black"}`}
+          >
+            {customers.phone}
+          </p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-          <p className="dark: text-black">{customers.email}</p>
+          <p
+            className={`${customers.send_status == "success" ? "text-success" : "text-black"}`}
+          >
+            {customers.email}
+          </p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-          <p className="dark: text-black">
+          <p
+            className={`${customers.send_status == "success" ? "text-success" : "text-black"}`}
+          >
             {customers.ref_code_created_date
               ? new Date(customers.ref_code_created_date).toLocaleString(
                   "en-US",
@@ -439,10 +466,16 @@ const CustomerList: React.FC<{
           </p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-          <p className="dark: text-black">{customers.ref_code}</p>
+          <p
+            className={`${customers.send_status == "success" ? "text-success" : "text-black"}`}
+          >
+            {customers.ref_code}
+          </p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-          <p className="dark: text-black">
+          <p
+            className={`${customers.send_status == "success" ? "text-success" : "text-black"}`}
+          >
             {customers.send_date
               ? new Date(customers.send_date).toLocaleString("en-US", {
                   year: "numeric",

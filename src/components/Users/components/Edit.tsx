@@ -101,7 +101,7 @@ const EditUsers: React.FC<EditProps> = ({
         },
       };
       await axios
-        .put(`${process.env.NEXT_PUBLIC_DEV_API}/users/${id}`, submittedData, {
+        .put(`${process.env.NEXT_PUBLIC_DEV_API}/users/${id}`, data, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
