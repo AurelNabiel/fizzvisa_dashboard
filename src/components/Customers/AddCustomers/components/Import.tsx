@@ -425,7 +425,7 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer, setStatus }) => {
                 className="absolute z-10 mt-3 h-full w-full cursor-pointer opacity-0"
               />
               <p className={`text-blue-500 ${documentData && "font-bold"}`}>
-                {!docs ? "Upload CSV or Excel File" : docs?.name}
+                {!docs ? "Upload CSV File" : docs?.name}
               </p>
             </button>
             {errorDocument && (
