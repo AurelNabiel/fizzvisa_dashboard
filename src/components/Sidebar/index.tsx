@@ -46,7 +46,7 @@ const menuGroups = [
             />
           </svg>
         ),
-        label: "Create Link",
+        label: "Create Link Customer",
         route: "/customers/add",
       },
       {
