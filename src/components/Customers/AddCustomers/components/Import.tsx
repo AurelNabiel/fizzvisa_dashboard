@@ -24,9 +24,9 @@ const schema = yup.object({
   phone: yup
     .string()
     .required("Phone is required")
-    .test("len", "Phone number must be 11 digits", (val) => {
+    .test("len", "Phone number must be 8 digits", (val) => {
       if (val) {
-        return val.length >= 11;
+        return val.length >= 8;
       }
       return false;
     }),
@@ -113,56 +113,67 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer, setStatus }) => {
       skipEmptyLines: true,
       complete: async (result) => {
         const data = result.data;
-        const headers = Object.keys(data[0]);
+        const headers = Object.keys(data[0] || {});
+        console.log("CSV Headers:", headers);
 
-        // Update the expected headers for CSV
         const expectedHeaders = [
-          "E-mail",
-          "Mobile Phone",
+          "Email",
+          "Phone Number",
           "Name",
           "Depart Date",
           "Return Date",
-          "Created Date Voucher Id",
-          "Voucher Id",
-          "Country",
+          "Date",
+          "Referal Code",
+          "Destination",
         ];
 
-        if (!areHeadersValid(headers, expectedHeaders)) {
-          console.log("Invalid headers", headers, data);
-
+        // Check if headers match expected headers
+        const missingHeaders = expectedHeaders.filter(
+          (header) => !headers.includes(header),
+        );
+        if (missingHeaders.length > 0) {
+          console.error("Missing Headers:", missingHeaders);
           setErrorDocument(
-            `Invalid CSV headers. Expected headers: ${expectedHeaders.join(", ")}`,
+            `Missing headers: ${missingHeaders.join(", ")}. Please fix the CSV file.`,
           );
           return;
         }
 
-        // Map data to match API structure
-        const formattedData = data.map((row) => ({
-          email: row["E-mail"],
-          phone: row["Mobile Phone"],
+        // Filter data to include only expected headers
+        const filteredData = data.map((row) => {
+          const filteredRow: Record<string, string> = {};
+          expectedHeaders.forEach((header) => {
+            filteredRow[header] = row[header] || ""; // Capture only expected headers
+          });
+          return filteredRow;
+        });
+
+        console.log("Filtered Data:", filteredData);
+
+        // Map filtered data to match API structure
+        const formattedData = filteredData.map((row) => ({
+          email: row["Email"],
+          phone: row["Phone Number"],
           fullname: row["Name"],
           depart_date: row["Depart Date"],
           return_date: row["Return Date"],
-          ref_code: row["Voucher Id"] || "",
-          ref_code_created_date: row["Created Date Voucher Id"] || "",
-          destination: row["Country"] || "",
+          ref_code: row["Referal Code"] || "",
+          ref_code_created_date: row["Date"] || "",
+          destination: row["Destination"] || "",
         }));
 
         const validationErrors: string[] = [];
         const validData: IFormInput[] = [];
 
-        // Use traditional for loop instead of for...of
         for (let index = 0; index < formattedData.length; index++) {
           const row = formattedData[index];
           try {
-            // Validate each row using Yup schema
             const validatedRow = await schema.validate(row, {
               abortEarly: false,
             });
             validData.push(validatedRow);
           } catch (err) {
             if (err instanceof yup.ValidationError) {
-              // Collect detailed validation errors
               validationErrors.push(
                 `Row ${index + 1}: ${err.errors.join(", ")}`,
               );
@@ -206,12 +217,13 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer, setStatus }) => {
     // Define expected headers in the correct order
     const expectedHeaders = [
       "Email",
-      "No HP",
-      "Nama Lengkap",
-      "Tanggal Keberangkatan",
-      "Tanggal Kepulangan",
-      "Tanggal Pembuatan Voucher Code",
-      "Voucher Code",
+      "Phone Number",
+      "Name",
+      "Depart Date",
+      "Return Date",
+      "Date",
+      "Referal Code",
+      "Destination",
     ];
 
     const headersXlsx = sheetData[0]; // Get the first row as headers
@@ -331,6 +343,7 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer, setStatus }) => {
           const formatted = {
             ...entry,
             first_name: entry.fullname.split(" ")[0],
+            phone: entry.phone.replace(/\D/g, ""),
             depart_date: new Date(entry.depart_date)
               .toISOString()
               .split("T")[0],
@@ -361,7 +374,11 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer, setStatus }) => {
           )
           .then((res) => {
             console.log(res.data);
-            setStatus({ load: false, error: false, message: "Customers saved successfully." });
+            setStatus({
+              load: false,
+              error: false,
+              message: "Customers saved successfully.",
+            });
             setTimeout(() => {
               setStatus({ load: false, error: false, message: "" });
             }, 3000);
@@ -392,7 +409,7 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer, setStatus }) => {
           onClick={() => setIsOpen(true)}
           className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
         >
-          Import +
+          Import CSV
         </Button>
       </div>
 
@@ -410,7 +427,7 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer, setStatus }) => {
           as="h3"
           className="mb-4 text-xl font-semibold text-gray-900 dark:text-white"
         >
-          Add Customers
+          Import Data Customers via CSV
         </Dialog.Title>
         <form onSubmit={handleSubmit}>
           <div>

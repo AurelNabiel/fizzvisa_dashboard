@@ -133,10 +133,6 @@ const CustomerAdd: React.FC = () => {
           <h2 className="text-2xl font-semibold text-black dark:text-white">
             Add Customers
           </h2>
-          <div className="flex gap-x-3">
-            <Import onAddCustomer={handleAddCustomer} setStatus={setStatus} />
-            <Add onAddCustomer={handleAddCustomer} />
-          </div>
         </div>
 
         {status.message && (
@@ -151,7 +147,15 @@ const CustomerAdd: React.FC = () => {
           </div>
         )}
         {/* Customer List */}
-        <div className="mt-4">
+        <div className="flex items-center justify-center gap-x-3 p-20">
+          <Import onAddCustomer={handleAddCustomer} setStatus={setStatus} />
+          <Add
+            setStatus={setStatus}
+            status={status}
+            onAddCustomer={handleAddCustomer}
+          />
+        </div>
+        {/* <div className="mt-4">
           <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
             Temporary Customer List
           </h3>
@@ -191,18 +195,20 @@ const CustomerAdd: React.FC = () => {
           </div>
         </div>
 
-        {/* Save Button */}
-        {customers.length > 0 && (
-          <div className="mt-4 text-right">
-            <button
-              disabled={selectedCustomers.length === 0 || status.load}
-              onClick={handleSaveSelected}
-              className={`inline-block rounded-lg  px-4 py-2 font-medium text-white transition ${selectedCustomers.length === 0 || status.load ? "cursor-not-allowed bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}`}
-            >
-              {status.load ? "Saving..." : "Save Selected"}
-            </button>
-          </div>
-        )}
+ 
+        <div className="">
+          {customers.length > 0 && (
+            <div className="mt-4 text-right">
+              <button
+                disabled={selectedCustomers.length === 0 || status.load}
+                onClick={handleSaveSelected}
+                className={`inline-block rounded-lg  px-4 py-2 font-medium text-white transition ${selectedCustomers.length === 0 || status.load ? "cursor-not-allowed bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}`}
+              >
+                {status.load ? "Saving..." : "Save Selected"}
+              </button>
+            </div>
+          )}
+        </div> */}
       </div>
     </>
   );

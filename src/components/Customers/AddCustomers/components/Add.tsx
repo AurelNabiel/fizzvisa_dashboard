@@ -22,10 +22,17 @@ interface IFormInput {
   destination: string;
   ref_code_created_date?: string;
 }
+interface ImportStatus {
+  load: boolean;
+  error: boolean;
+  message: string;
+}
 
 interface AddProps {
   // getCustomers: (key: string) => Promise<void>;
   onAddCustomer: (customer: any) => void;
+  setStatus: (status: ImportStatus) => void;
+  status: ImportStatus;
 }
 const schema = yup.object({
   fullname: yup.string().required("Name is required"),
@@ -33,9 +40,9 @@ const schema = yup.object({
   phone: yup
     .string()
     .required("Phone is required")
-    .test("len", "Phone number must be 11 digits", (val) => {
+    .test("len", "Phone number must be 8 digits", (val) => {
       if (val) {
-        return val.length >= 11;
+        return val.length >= 8;
       }
       return false;
     }),
@@ -82,7 +89,7 @@ const schema = yup.object({
     otherwise: (schema) => schema.notRequired(),
   }),
 });
-const Add: React.FC<AddProps> = ({ onAddCustomer }) => {
+const Add: React.FC<AddProps> = ({ onAddCustomer, setStatus, status }) => {
   const { countries } = useCountries();
   const sortedCountries = countries
     ? countries
@@ -105,21 +112,43 @@ const Add: React.FC<AddProps> = ({ onAddCustomer }) => {
   const currentName = useWatch({ control, name: "fullname" }) || "";
   //   console.log(currentName);
 
-  const [status, setStatus] = React.useState({ load: false, error: false });
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    setStatus({ load: true, error: false });
+    setStatus({ load: true, error: false, message: "" });
     try {
       const submitData = {
         ...data,
-        first_name : data.fullname.split(" ")[0],
-      }
-      onAddCustomer(submitData);
+        first_name: data.fullname.split(" ")[0],
+      };
+      await axios
+        .post(
+          `${process.env.NEXT_PUBLIC_DEV_API}/customer/create`,
+          { customers: [submitData] },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        )
+        .then((res) => {
+          console.log(res.data);
+          setStatus({
+            load: false,
+            error: false,
+            message: "Customers saved successfully.",
+          });
+          setTimeout(() => {
+            setStatus({ load: false, error: false, message: "" });
+          }, 3000);
+        });
+
+      setIsOpen(false);
+
       reset();
-      setStatus({ load: false, error: false });
       setIsOpen(false);
     } catch (error) {
       console.log(error);
-      setStatus({ load: false, error: true });
+      setStatus({ load: false, error: true, message: "" });
     }
   };
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
@@ -151,7 +180,7 @@ const Add: React.FC<AddProps> = ({ onAddCustomer }) => {
           }}
           className="w-full cursor-pointer rounded-lg border border-primary bg-primary px-4 py-2 text-white transition hover:bg-opacity-90"
         >
-          Add +
+          Add Manual
         </Button>
       </div>
       <ModalPop
@@ -260,11 +289,13 @@ const Add: React.FC<AddProps> = ({ onAddCustomer }) => {
               onPointerLeaveCapture={undefined}
               crossOrigin={undefined}
               placeholder="081234567890"
-              onKeyPress={(e) => {
-                const allowedCharacters = /^[0-9+]$/;
-                if (!allowedCharacters.test(e.key)) {
-                  e.preventDefault(); // Mencegah karakter yang tidak diizinkan
-                }
+              inputMode="numeric"
+              pattern="[0-9]*"
+              onBeforeInput={(e: React.FormEvent<HTMLInputElement>) => {
+              const input = (e as any).data;
+              if (input && /\D/.test(input)) {
+                e.preventDefault();
+              }
               }}
               {...register("phone", { required: true })}
               className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
