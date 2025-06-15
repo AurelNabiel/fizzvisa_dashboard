@@ -142,7 +142,7 @@ const Customers: React.FC = () => {
       <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         <div className="flex items-center justify-between pb-4">
           <h2 className="dark: text-lg font-semibold text-black">
-            Customers List
+            Customers Applicant
           </h2>
           <div className="flex gap-x-3">
             <input

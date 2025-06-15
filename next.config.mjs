@@ -6,13 +6,16 @@ const basePath =
     : "";
 
 const nextConfig = {
-  basePath : basePath,
+  basePath: basePath,
+  images: {
+    domains: ["203.145.34.100"],
+  },
+
   async rewrites() {
     return [
       {
-       
-        source: '/admin/images/:path*', // Match all requests to /admin/images/*
-        destination: '/images/:path*', // Serve them from /images/* in the public folder
+        source: "/admin/images/:path*",
+        destination: "/images/:path*",
       },
     ];
   },
