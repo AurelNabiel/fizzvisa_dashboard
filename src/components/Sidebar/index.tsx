@@ -108,7 +108,7 @@ const menuGroups = [
             />
           </svg>
         ),
-        label: "Customers List",
+        label: "Customer Applicant",
         route: "/customers",
       },
 
