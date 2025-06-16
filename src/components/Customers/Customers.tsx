@@ -432,7 +432,7 @@ const CustomerList: React.FC<{
   const decryptedRefCode = decryptData(customers.ref_code);
   // console.log(decryptedRefCode, "HAI", customers.fullname);
   const route = useRouter();
-  
+
   const togglePaidStatus = async () => {
     try {
       const updatedPaidStatus = !customers.is_paid;
@@ -487,7 +487,9 @@ const CustomerList: React.FC<{
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="dark: text-black">
-            {customers.first_name ?? customers.fullname ?? "Unknown"}
+            {(customers.first_name || customers.last_name) != null
+              ? `${customers.first_name || ""} ${customers.last_name || ""}`
+              : customers.fullname || "Name not available"}
           </p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">

@@ -202,7 +202,6 @@ const CustomersLink: React.FC = () => {
                 ? customers.map((data, key) => (
                     <CustomerList
                       num={key}
-                      
                       selectedCustomers={selectedCustomers}
                       setSelectedCustomers={setSelectedCustomers}
                       handleCheckboxChange={handleCheckboxChange}
@@ -369,7 +368,9 @@ const CustomerList: React.FC<{
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
           <p className="dark: text-black">
-            {customers.first_name ?? customers.fullname ?? "Unknown"}
+            {(customers.first_name || customers.last_name) != null
+              ? `${customers.first_name || ""} ${customers.last_name || ""}`
+              : customers.fullname || "Name not available"}
           </p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
