@@ -50,8 +50,12 @@ const EditSubmitted: React.FC<EditProps> = ({
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     setStatus({ load: true, error: false });
     try {
+      const submitData = {
+        email: data.email,
+        send_status: "failed"
+      }
       await axios
-        .put(`${process.env.NEXT_PUBLIC_DEV_API}/customer/edit/${id}`, data, {
+        .put(`${process.env.NEXT_PUBLIC_DEV_API}/customer/edit/${id}`, submitData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

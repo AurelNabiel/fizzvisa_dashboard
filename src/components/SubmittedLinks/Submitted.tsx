@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { decryptData } from "./components/Decryption";
 import { Edit } from "iconsax-react";
 import EditSubmitted from "./components/Edit";
+import { ref } from "yup";
 
 const SubmittedLinks: React.FC = () => {
   const route = useRouter();
@@ -55,120 +56,15 @@ const SubmittedLinks: React.FC = () => {
   React.useEffect(() => {
     getCustomers("", page);
   }, [page]);
+
   // select
-  const [selectedCustomers, setSelectedCustomers] = React.useState<any[]>(
-    customers.filter((c) => c.send_status === "success"), // Auto-select customers with "success"
-  );
-
-  const selectableCustomers = customers.filter(
-    (c) => c.send_status !== "success",
-  );
-  const selectAll =
-    selectableCustomers.length > 0 &&
-    selectableCustomers.every((c) => selectedCustomers.includes(c));
-
-  const handleCheckboxChange = (customer: any) => {
-    if (customer.send_status === "success") return; // tidak boleh ubah yang success
-
-    setSelectedCustomers((prev) =>
-      prev.includes(customer)
-        ? prev.filter((c) => c !== customer)
-        : [...prev, customer],
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectAll) {
-      // Hapus semua kecuali yang send_status "success"
-      setSelectedCustomers(
-        customers.filter((c) => c.send_status === "success"),
-      );
-    } else {
-      // Pilih semua pelanggan kecuali yang send_status "success"
-      const selectable = customers.filter((c) => c.send_status !== "success");
-      const alreadySelectedSuccess = selectedCustomers.filter(
-        (c) => c.send_status === "success",
-      );
-      setSelectedCustomers([...alreadySelectedSuccess, ...selectable]);
-    }
-  };
 
   const [submitStatus, setSubmitStatus] = React.useState({
     load: false,
     error: false,
     message: "",
   });
-  const handleSubmitSelected = async () => {
-    setSubmitStatus({ load: true, error: false, message: "" });
 
-    try {
-      const customersToSubmit = selectedCustomers.filter(
-        (customer) => customer.send_status !== "success",
-      );
-
-      if (customersToSubmit.length === 0) {
-        setSubmitStatus({
-          load: false,
-          error: true,
-          message: "No customers to submit",
-        });
-        return;
-      }
-
-      const submit = {
-        data: customersToSubmit.map((customer) => {
-          return {
-            ref_code: decryptData(customer.ref_code),
-            email: customer.email,
-            fullname: customer.fullname,
-          };
-        }),
-      };
-
-      console.log(submit);
-
-      await axios
-        .post(`${process.env.NEXT_PUBLIC_DEV_API}/customer/send-link`, submit, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          console.log(res);
-          setSubmitStatus({
-            load: false,
-            error: false,
-            message: "Email has been added to the queue",
-          });
-          setSelectedCustomers([]);
-          getCustomers("", page);
-          setTimeout(() => {
-            setSubmitStatus({ load: false, error: false, message: "" });
-          }, 3000);
-        });
-    } catch (error) {
-      console.log(error);
-      setSubmitStatus({
-        load: false,
-        error: true,
-        message: "Something went wrong",
-      });
-      setTimeout(() => {
-        setSubmitStatus({ load: false, error: false, message: "" });
-      }, 3000);
-    }
-  };
-
-  React.useEffect(() => {
-    setSelectedCustomers((prev) =>
-      Array.from(
-        new Set([
-          ...prev.filter((c) => c.send_status === "success"),
-          ...customers.filter((c) => c.send_status === "success"),
-        ]),
-      ),
-    );
-  }, [customers]);
   // filter agent
 
   // filter link sudah di send
@@ -212,14 +108,6 @@ const SubmittedLinks: React.FC = () => {
           <table className="w-full table-auto">
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                <th className="dark: min-w-[40px] px-4 py-4 pl-9 font-medium text-black xl:pl-11">
-                  <input
-                    type="checkbox"
-                    className="rounded-md border-gray-300 text-primary focus:border-primary"
-                    checked={selectAll}
-                    onChange={handleSelectAll}
-                  />
-                </th>
                 <th className="dark: min-w-[20px] px-1 py-4 font-medium text-black xl:pl-11">
                   No.
                 </th>
@@ -242,6 +130,9 @@ const SubmittedLinks: React.FC = () => {
                   Submitted Date
                 </th>
                 <th className="dark: px-4 py-4 font-medium text-black">Edit</th>
+                <th className="dark: px-4 py-4 font-medium text-black">
+                  Resend
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -249,9 +140,8 @@ const SubmittedLinks: React.FC = () => {
                 ? customers.map((data, key) => (
                     <CustomerList
                       num={key}
-                      selectedCustomers={selectedCustomers}
-                      setSelectedCustomers={setSelectedCustomers}
-                      handleCheckboxChange={handleCheckboxChange}
+                      setSubmitStatus={setSubmitStatus}
+                      submitStatus={submitStatus}
                       key={key}
                       customers={data}
                       getCustomers={getCustomers}
@@ -290,7 +180,6 @@ const SubmittedLinks: React.FC = () => {
               disabled={page === 1}
               onClick={() => {
                 setPage((prev) => prev - 1);
-                setSelectedCustomers([]);
               }}
             >
               Previous
@@ -318,7 +207,6 @@ const SubmittedLinks: React.FC = () => {
                   key={p}
                   onClick={() => {
                     setPage(p);
-                    setSelectedCustomers([]);
                   }}
                   className={`rounded-lg border px-3 py-2 ${
                     page === p
@@ -354,23 +242,6 @@ const SubmittedLinks: React.FC = () => {
               Next
             </button>
           </nav>
-          <button
-            onClick={handleSubmitSelected}
-            className={`rounded-lg border px-4 py-2 text-white hover:bg-opacity-90 ${
-              selectedCustomers.length === 0 ||
-              submitStatus.load ||
-              selectedCustomers.every((c) => c.send_status === "success")
-                ? "cursor-not-allowed bg-gray-300"
-                : "bg-primary"
-            }`}
-            disabled={
-              selectedCustomers.length === 0 ||
-              submitStatus.load ||
-              selectedCustomers.every((c) => c.send_status === "success")
-            }
-          >
-            {submitStatus.load ? "Sending..." : "Send Link"}
-          </button>
         </div>
       </div>
     </>
@@ -380,41 +251,91 @@ const SubmittedLinks: React.FC = () => {
 const CustomerList: React.FC<{
   currentPage: number;
   customers: Customers;
-  getCustomers: (key: string, page: number, agent_id: number) => Promise<void>;
-  selectedCustomers: any[];
-  setSelectedCustomers: (value: any[]) => void;
-  handleCheckboxChange: (customer: any) => void;
+  getCustomers: (key: string, page: number) => Promise<void>;
   num: number;
   role: string;
+  submitStatus: {
+    load: boolean;
+    error: boolean;
+    message: string;
+  };
+  setSubmitStatus: React.Dispatch<
+    React.SetStateAction<{
+      load: boolean;
+      error: boolean;
+      message: string;
+    }>
+  >;
 }> = ({
   customers,
   getCustomers,
   currentPage,
-  selectedCustomers,
-  setSelectedCustomers,
-  handleCheckboxChange,
+  setSubmitStatus,
+
+  submitStatus,
   num,
-  role,
 }) => {
+  const token = Cookies.get("token");
   const [editOpen, setEditOpen] = React.useState(false);
   const decryptedRefCode = decryptData(customers.ref_code);
   // console.log(decryptedRefCode, "HAI", customers.fullname);
   const route = useRouter();
+  const [loading, setLoading] = React.useState(false);
+  const handleSubmitSelected = async (
+    data: [ref_code: string, email: string, fullname: string],
+  ) => {
+    setSubmitStatus({ load: true, error: false, message: "" });
+    setLoading(true);
+    try {
+      const submitData = {
+        data: [
+          {
+            ref_code: data[0],
+            email: data[1],
+            fullname: data[2],
+          },
+        ],
+      };
+      console.log(submitData);
+      await axios
+        .post(
+          `${process.env.NEXT_PUBLIC_DEV_API}/customer/send-link`,
+          submitData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        )
+        .then((res) => {
+          console.log(res);
+          setSubmitStatus({
+            load: false,
+            error: false,
+            message: "Email has been added to the queue",
+          });
+
+          getCustomers("", 0);
+          setTimeout(() => {
+            setSubmitStatus({ load: false, error: false, message: "" });
+          }, 3000);
+        });
+    } catch (error) {
+      console.log(error);
+      setSubmitStatus({
+        load: false,
+        error: true,
+        message: "Something went wrong",
+      });
+      setTimeout(() => {
+        setSubmitStatus({ load: false, error: false, message: "" });
+      }, 3000);
+    }
+  };
 
   return (
     <>
       <tr>
-        <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
-          <input
-            type="checkbox"
-            className="rounded-md border-gray-300 text-primary focus:border-primary"
-            checked={selectedCustomers.includes(customers)}
-            onChange={() => {
-              handleCheckboxChange(customers);
-            }}
-            disabled={customers.send_status === "success"}
-          />
-        </td>
         <th className="dark: min-w-[20px] px-1 py-4 font-medium text-black xl:pl-11">
           {(currentPage - 1) * 10 + num + 1}
         </th>
@@ -429,7 +350,9 @@ const CustomerList: React.FC<{
           <p
             className={`${customers.send_status == "success" ? "text-success" : "text-black"}`}
           >
-            {customers.first_name ?? customers.fullname ?? "Unknown"}
+            {(customers.first_name || customers.last_name) != null
+              ? `${customers.first_name || ""} ${customers.last_name || ""}`
+              : customers.fullname || "Name not available"}
           </p>
         </td>
         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
@@ -498,9 +421,28 @@ const CustomerList: React.FC<{
             className="mr-2 cursor-pointer hover:text-green-500"
           />
         </td>
+        <td>
+          <button
+            disabled={submitStatus.load}
+            className="hover:bg-primary-dark rounded-md bg-primary px-4 py-2 text-white"
+            onClick={() => {
+              handleSubmitSelected([
+                customers.ref_code,
+                customers.email ?? "",
+                customers.fullname ?? "",
+              ]);
+            }}
+          >
+            {loading ? "Sending..." : "Resend"}
+            {submitStatus.error && <span className="text-red-500">Error</span>}
+            {submitStatus.message && !submitStatus.error && (
+              <span className="text-green-500">Success</span>
+            )}
+          </button>
+        </td>
       </tr>
       <EditSubmitted
-        getData={() => getCustomers("", currentPage ?? 1, 0)}
+        getData={() => getCustomers("", currentPage ?? 1)}
         id={customers.ref_code}
         email={customers.email ?? ""}
         isOpen={editOpen}

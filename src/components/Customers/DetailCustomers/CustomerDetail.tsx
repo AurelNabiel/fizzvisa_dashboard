@@ -73,8 +73,9 @@ const CustomerDetail: React.FC = () => {
         referralCode: customerData.ref_code || "N/A",
         phoneNumber: customerData.phone || "N/A",
         name:
-          `${customerData.first_name} ${customerData.middle_name ?? ""} ${customerData.last_name}` ||
-          "N/A",
+          (customerData.first_name || customerData.last_name) != null
+            ? `${customerData.first_name || ""} ${customerData.last_name || ""}`
+            : customerData.fullname || "Name not available",
         email: customerData.email || "N/A",
         maritalStatus: customerData.marital_status || "N/A",
         address: customerData.address || "N/A",
@@ -367,7 +368,9 @@ const CustomerDetail: React.FC = () => {
                     handleDownloadDocuments();
                   }}
                 >
-                  {submitStatus.load ? "Downloading..." : "Download All Documents"}
+                  {submitStatus.load
+                    ? "Downloading..."
+                    : "Download All Documents"}
                 </Button>
               </div>
               <div className="border-b-2"></div>
@@ -380,24 +383,31 @@ const CustomerDetail: React.FC = () => {
                       key={index}
                       className="flex flex-col items-start  rounded-lg bg-white p-3 text-black shadow-md"
                     >
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-6 w-6 text-orange-500" />
-                        <div className="flex-1">
-                          <p className="text-base font-medium">{doc.label}</p>
-                          <p className="text-sm text-gray-500">{doc.name}</p>
+                      <div className="flex w-full  items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-6 w-6 text-orange-500" />
+                          <div className="flex-1">
+                            <p className="text-base font-medium">{doc.label}</p>
+                            <p className="text-sm text-gray-500">{doc.name}</p>
+                          </div>
                         </div>
-                        <button
-                          disabled={doc.name == "Not Uploaded" ? true : false}
-                          className={`border-none bg-transparent p-1 ${doc.name == "Not Uploaded" ? "text-gray-500" : "text-orange-500"}`}
-                          onClick={() => {
-                            const apiUrl: string =
-                              process.env.NEXT_PUBLIC_DEV_API || "";
-                            const baseUrl: string = apiUrl.replace("/api", "");
-                            window.open(`${baseUrl}/assets/${doc.name}`);
-                          }}
-                        >
-                          View
-                        </button>
+                        <div>
+                          <button
+                            disabled={doc.name == "Not Uploaded" ? true : false}
+                            className={`border-none bg-transparent p-1 ${doc.name == "Not Uploaded" ? "text-gray-500" : "text-orange-500"}`}
+                            onClick={() => {
+                              const apiUrl: string =
+                                process.env.NEXT_PUBLIC_DEV_API || "";
+                              const baseUrl: string = apiUrl.replace(
+                                "/api",
+                                "",
+                              );
+                              window.open(`${baseUrl}/assets/${doc.name}`);
+                            }}
+                          >
+                            View
+                          </button>
+                        </div>
                       </div>
                       {isImage && (
                         <div className="relative mt-2">
