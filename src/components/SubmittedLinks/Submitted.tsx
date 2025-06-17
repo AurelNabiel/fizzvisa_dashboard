@@ -312,10 +312,10 @@ const CustomerList: React.FC<{
           setSubmitStatus({
             load: false,
             error: false,
-            message: "Email has been added to the queue",
+            message: "Email has been sent successfully",
           });
 
-          getCustomers("", 0);
+          getCustomers("", 1);
           setTimeout(() => {
             setSubmitStatus({ load: false, error: false, message: "" });
           }, 3000);

@@ -13,10 +13,12 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 const ChartTotalSentLink: React.FC = () => {
   const token = Cookies.get("token");
 
-  const [total, setTotal] = useState<number>(0);
+  const [totalSent, setTotalSent] = useState<number>(0);
+  const [totalNotSent, setTotalNotSent] = useState<number>(0);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [minEndDate, setMinEndDate] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   React.useEffect(() => {
     const today = new Date();
     const threeMonthsLater = new Date(today.setMonth(today.getMonth() + 3));
@@ -30,17 +32,22 @@ const ChartTotalSentLink: React.FC = () => {
   }, [startDate]);
   const getData = async (startDate: string, endDate: string) => {
     try {
+      setLoading(true);
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_DEV_API}/dashboard/total-link-sent?${startDate != "" ? `start_date=${startDate}` : ""}${endDate != "" ? `&end_date=${endDate}` : ""}`,
+        `${process.env.NEXT_PUBLIC_DEV_API}/dashboard/link-status?${startDate != "" ? `start_date=${startDate}` : ""}${endDate != "" ? `&end_date=${endDate}` : ""}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         },
       );
-      setTotal(response.data.data.total || 0);
+      setTotalSent(response.data.data.total_sent_link.total);
+      console.log("Total Sent Links Data:", response.data.data);
+      setTotalNotSent(response.data.data.total_not_sent_link.total);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
+      setLoading(false);
     }
   };
 
@@ -113,31 +120,85 @@ const ChartTotalSentLink: React.FC = () => {
       >
         Total Sent Links
       </Typography>
-      <ReactApexChart
-        options={{
-          chart: {
-            type: "radialBar",
-          },
-          plotOptions: {
-            radialBar: {
-              dataLabels: {
-                value: {
-                  show: true,
-                  fontSize: "20px",
-                  color: "#333",
-                  offsetY: 4,
-                  formatter: (value: any) => value, // Display the raw value without percentage
+      {loading ? (
+        <div className="flex h-80 flex-col items-center justify-center">
+          {/* Skeleton Donut Chart */}
+          <div className="relative h-40 w-40 animate-pulse rounded-full bg-gray-200">
+            {/* Bagian tengah donat */}
+            <div className="absolute inset-10 h-20 w-20 rounded-full bg-gray-100"></div>
+          </div>
+          {/* Skeleton untuk Legend */}
+          <div className="mt-4 space-y-2">
+            <div className="h-4 w-40 animate-pulse rounded bg-gray-200"></div>
+            <div className="h-4 w-32 animate-pulse rounded bg-gray-200"></div>
+          </div>
+        </div>
+      ) : (
+        <ReactApexChart
+          options={{
+            chart: {
+              type: "donut",
+            },
+            plotOptions: {
+              pie: {
+                donut: {
+                  size: "60%", // Ukuran tengah donat
+                  labels: {
+                    show: true,
+                    total: {
+                      show: true,
+                      label: "Total Links",
+                      formatter: () => `${totalSent + totalNotSent}`, // Total jumlah
+                    },
+                  },
                 },
               },
             },
-          },
-          colors: ["#3C50E0"],
-          labels: ["Total Sent"],
-        }}
-        series={[total]} // Displaying the total value directly
-        type="radialBar"
-        height={350}
-      />
+
+            labels: ["Total Sent Links", "Total Not Sent Links"], // Label untuk setiap bagian
+            colors: ["#3C50E0", "#FF4560"], // Warna: Biru (Sent), Merah (Not Sent)
+            dataLabels: {
+              style: {
+                colors: ["#FFFFFF"],
+              },
+              enabled: false,
+            },
+            legend: {
+              formatter: function (val, opts) {
+                // Format legend untuk menampilkan label + jumlah
+                const value = opts.w.globals.series[opts.seriesIndex];
+                return `${val} : ${value}`;
+              },
+              position: "right", // Posisi legend di kanan
+              labels: {
+                colors: "#333", // Warna teks legend
+                useSeriesColors: false, // Tidak mengikuti warna seri
+              },
+            },
+
+            responsive: [
+              {
+                breakpoint: 480,
+                options: {
+                  chart: {
+                    width: 200,
+                  },
+                  legend: {
+                    position: "bottom",
+                  },
+                },
+              },
+            ],
+          }}
+          series={[
+            totalSent, // Total Sent Links
+            totalNotSent, // Total Not Sent Links
+          ]}
+          type="donut"
+          height={350}
+        />
+      )}
+
       <div className="mb-4 flex justify-end">
         <Button
           onClick={handleClear}
