@@ -72,6 +72,7 @@ const schema = yup.object({
         ),
     otherwise: (schema) => schema.notRequired(),
   }),
+  
 });
 
 interface ImportStatus {
@@ -159,7 +160,7 @@ const Import: React.FC<ImportProps> = ({ onAddCustomer, setStatus }) => {
           return_date: row["Return Date"],
           ref_code: row["Referal Code"] || "",
           ref_code_created_date: row["Date"] || "",
-          destination: row["Destination"] || "",
+          destination: row["Destination"],
         }));
 
         const validationErrors: string[] = [];
