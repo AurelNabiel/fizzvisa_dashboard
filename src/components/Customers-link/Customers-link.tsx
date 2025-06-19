@@ -84,7 +84,7 @@ const CustomersLink: React.FC = () => {
       const submit = {
         data: selectedCustomers.map((customer) => {
           return {
-            ref_code: decryptData(customer.ref_code),
+            ref_code: customer.ref_code,
             email: customer.email,
             fullname: customer.fullname,
           };
