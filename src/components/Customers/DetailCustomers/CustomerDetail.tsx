@@ -11,6 +11,7 @@ const CustomerDetail: React.FC = () => {
   const token = Cookies.get("token");
 
   interface CustomerDetails {
+    id: string;
     referralCode: string;
     phoneNumber: string;
     name: string;
@@ -32,6 +33,7 @@ const CustomerDetail: React.FC = () => {
   }
 
   const [details, setDetails] = React.useState<CustomerDetails>({
+    id: "0",
     referralCode: "N/A",
     phoneNumber: "N/A",
     name: "N/A",
@@ -70,6 +72,7 @@ const CustomerDetail: React.FC = () => {
 
       // Update the details state
       setDetails({
+        id: customerData.id,
         referralCode: customerData.ref_code || "N/A",
         phoneNumber: customerData.phone || "N/A",
         name:
@@ -160,7 +163,7 @@ const CustomerDetail: React.FC = () => {
     try {
       setSubmitStatus({ load: true, error: false, message: "" });
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_DEV_API}/customer/download?customer_ids=${id}`,
+        `${process.env.NEXT_PUBLIC_DEV_API}/customer/download?customer_ids=${details.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
